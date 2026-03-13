@@ -1,0 +1,19 @@
+.message {
+  font-size: 0.875rem;
+  color: var(--color-error);
+  text-align: center;
+  min-height: 1.25rem; /* Évite le layout shift — réserve l'espace même vide */
+  margin: 0;
+}
+
+/* Animation déclenchée uniquement quand .visible est ajouté (message présent) */
+@media (prefers-reduced-motion: no-preference) {
+  .visible {
+    animation: errorFadeIn 200ms ease-out;
+  }
+
+  @keyframes errorFadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+}

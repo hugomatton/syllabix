@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Syllabix — Design Directions (Light)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #f5f5f0;
+      color: #111;
+      padding: 2rem 1rem 4rem;
+    }
+
+    h1 { text-align: center; font-size: 1.25rem; color: #999; margin-bottom: 0.25rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; }
+    .subtitle { text-align: center; color: #bbb; font-size: 0.8rem; margin-bottom: 2.5rem; }
+
+    .nav {
+      display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center;
+      margin-bottom: 3rem;
+    }
+    .nav button {
+      background: white; border: 1px solid #e0e0e0;
+      color: #888; padding: 0.4rem 1rem; border-radius: 6px;
+      font-family: inherit; font-size: 0.8rem; cursor: pointer; transition: all 0.15s;
+    }
+    .nav button:hover { border-color: #111; color: #111; }
+    .nav button.active { background: #111; color: white; border-color: #111; }
+
+    .directions { display: none; }
+    .directions.visible { display: block; }
+
+    .dir-title {
+      text-align: center; font-size: 0.7rem; text-transform: uppercase;
+      letter-spacing: 0.2em; color: #999; margin-bottom: 0.5rem;
+    }
+    .dir-desc { text-align: center; color: #888; font-size: 0.85rem; margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto; }
+
+    /* ── Grid de mockups côte à côte ── */
+    .mockups-grid {
+      display: flex; flex-wrap: wrap; gap: 2rem; justify-content: center;
+    }
+
+    .mockup-wrap { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; }
+    .mockup-label {
+      font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.15em; color: #999;
+    }
+
+    .mockup {
+      width: 320px;
+      background: white;
+      border: 1px solid #e8e8e8;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    }
+
+    /* ════════════════════════════════════
+       LAYOUT DIR 3 — Arcade (structure fixe)
+       On applique 3 variantes de couleur
+    ════════════════════════════════════ */
+    .game { padding: 1.75rem 1.5rem 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 1.25rem; }
+
+    .header { width: 100%; display: flex; justify-content: space-between; font-size: 0.75rem; color: #999; }
+    .header span { color: #111; font-weight: 700; }
+
+    .circle-wrap { position: relative; width: 100px; height: 100px; }
+    .circle-text {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      font-size: 1.75rem; font-weight: 900; font-variant-numeric: tabular-nums;
+    }
+
+    .word { font-size: 2.5rem; font-weight: 900; text-align: center; letter-spacing: -0.03em; color: #111; }
+
+    .chain { display: flex; gap: 0.4rem; flex-wrap: wrap; justify-content: center; max-height: 56px; overflow: hidden; }
+    .chip {
+      font-size: 0.65rem; background: #f5f5f0; border: 1px solid #e0e0e0;
+      border-radius: 99px; padding: 0.2rem 0.6rem; color: #888;
+    }
+
+    .input-field {
+      background: #f7f7f5; border: 1.5px solid #e0e0e0;
+      border-radius: 10px; padding: 0.75rem 1rem; font-family: inherit;
+      font-size: 1rem; color: #111; outline: none; width: 100%; transition: all 0.2s;
+    }
+
+    /* ── VARIANTE A : Indigo ── */
+    .v-indigo .circle-text { color: #6366f1; }
+    .v-indigo .word .syl { color: #6366f1; }
+    .v-indigo .chip.last { border-color: #6366f1; color: #6366f1; background: #eef2ff; }
+    .v-indigo .input-field:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.12); }
+
+    /* ── VARIANTE B : Emerald ── */
+    .v-emerald .circle-text { color: #10b981; }
+    .v-emerald .word .syl { color: #10b981; }
+    .v-emerald .chip.last { border-color: #10b981; color: #10b981; background: #ecfdf5; }
+    .v-emerald .input-field:focus { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.12); }
+
+    /* ── VARIANTE C : Orange ── */
+    .v-orange .circle-text { color: #f97316; }
+    .v-orange .word .syl { color: #f97316; }
+    .v-orange .chip.last { border-color: #f97316; color: #f97316; background: #fff7ed; }
+    .v-orange .input-field:focus { border-color: #f97316; box-shadow: 0 0 0 3px rgba(249,115,22,0.12); }
+
+    /* ── VARIANTE D : Rose ── */
+    .v-rose .circle-text { color: #f43f5e; }
+    .v-rose .word .syl { color: #f43f5e; }
+    .v-rose .chip.last { border-color: #f43f5e; color: #f43f5e; background: #fff1f2; }
+    .v-rose .input-field:focus { border-color: #f43f5e; box-shadow: 0 0 0 3px rgba(244,63,94,0.12); }
+
+    /* ── VARIANTE E : Sky ── */
+    .v-sky .circle-text { color: #0ea5e9; }
+    .v-sky .word .syl { color: #0ea5e9; }
+    .v-sky .chip.last { border-color: #0ea5e9; color: #0ea5e9; background: #f0f9ff; }
+    .v-sky .input-field:focus { border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14,165,233,0.12); }
+
+    /* ── VARIANTE F : Amber (jaune/moutarde) ── */
+    .v-amber .circle-text { color: #d97706; }
+    .v-amber .word .syl { color: #d97706; }
+    .v-amber .chip.last { border-color: #d97706; color: #d97706; background: #fffbeb; }
+    .v-amber .input-field:focus { border-color: #d97706; box-shadow: 0 0 0 3px rgba(217,119,6,0.12); }
+
+    /* ── Game Over (variante choisie) ── */
+    .gameover { padding: 2rem 1.5rem; display: flex; flex-direction: column; gap: 1.5rem; align-items: center; }
+    .go-reason { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.15em; color: #999; text-align: center; }
+    .go-msg {
+      font-size: 0.85rem; color: #555; background: #f7f7f5;
+      border: 1px solid #e0e0e0; border-radius: 10px;
+      padding: 0.75rem 1rem; text-align: center; line-height: 1.6;
+    }
+    .go-msg strong { color: #111; }
+    .go-scores { display: flex; gap: 2rem; }
+    .go-score { text-align: center; }
+    .go-val { font-size: 2.25rem; font-weight: 900; font-variant-numeric: tabular-nums; }
+    .go-label { font-size: 0.6rem; color: #999; text-transform: uppercase; letter-spacing: 0.1em; }
+    .go-words { display: flex; flex-wrap: wrap; gap: 0.35rem; justify-content: center; }
+    .go-word {
+      font-size: 0.75rem; background: #f7f7f5; border: 1px solid #e0e0e0;
+      border-radius: 6px; padding: 0.25rem 0.55rem; cursor: pointer; color: #555; transition: all 0.15s;
+    }
+    .go-word:hover { color: #111; border-color: #111; }
+
+    .go-btn {
+      width: 100%; padding: 0.875rem; border: none;
+      border-radius: 10px; font-family: inherit; font-size: 0.95rem;
+      font-weight: 700; cursor: pointer; color: white;
+    }
+
+    /* ── Start Screen ── */
+    .startscreen { padding: 2.5rem 1.5rem; display: flex; flex-direction: column; gap: 1.5rem; align-items: center; }
+    .logo { font-size: 1.75rem; font-weight: 900; letter-spacing: -0.03em; color: #111; }
+    .rule-text { font-size: 0.85rem; color: #666; text-align: center; line-height: 1.6; }
+    .rule-text strong { color: #111; }
+    .example-box {
+      background: #f7f7f5; border: 1px solid #e0e0e0;
+      border-radius: 10px; padding: 0.875rem 1.25rem;
+      display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; justify-content: center;
+    }
+    .ex-word { font-weight: 700; font-size: 0.9rem; }
+    .ex-arrow { color: #ccc; }
+    .modes { display: flex; gap: 0.6rem; width: 100%; }
+    .mode-btn {
+      flex: 1; padding: 0.7rem 0.4rem; background: #f7f7f5;
+      border: 1.5px solid #e0e0e0; border-radius: 10px; text-align: center; cursor: pointer;
+    }
+    .mode-name { font-size: 0.75rem; font-weight: 600; display: block; }
+    .mode-time { font-size: 0.65rem; color: #999; }
+    .play-btn {
+      width: 100%; padding: 0.875rem; border: none;
+      border-radius: 10px; font-family: inherit; font-size: 0.95rem;
+      font-weight: 700; cursor: pointer; color: white;
+    }
+    .record-txt { font-size: 0.7rem; color: #bbb; }
+    .record-txt span { color: #666; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+<h1>Syllabix — Layout Arcade · Thème Light</h1>
+<p class="subtitle">Structure Dir 3 · 3 écrans × 6 accents — clique pour naviguer</p>
+
+<nav class="nav">
+  <button class="active" onclick="show('game')">Écran de jeu</button>
+  <button onclick="show('gameover')">Game Over</button>
+  <button onclick="show('start')">Démarrage</button>
+</nav>
+
+
+<!-- ════ ÉCRAN DE JEU ════ -->
+<div class="directions visible" id="screen-game">
+  <div class="dir-title">Écran de jeu · 6 accents</div>
+  <p class="dir-desc">Structure Arcade identique — seule la couleur d'accent change. La syllabe de rebond + le chrono + le dernier chip prennent cette couleur.</p>
+  <div class="mockups-grid">
+
+    <!-- Indigo -->
+    <div class="mockup-wrap">
+      <div class="mockup-label">Indigo</div>
+      <div class="mockup"><div class="game v-indigo">
+        <div class="header"><div>Score <span>12</span></div><div>Record <span>18</span></div></div>
+        <div class="circle-wrap">
+          <svg width="100" height="100" style="position:absolute;transform:rotate(-90deg)">
+            <circle cx="50" cy="50" r="44" fill="none" stroke="#e0e0e0" stroke-width="4"/>
+            <circle cx="50" cy="50" r="44" fill="none" stroke="#6366f1" stroke-width="4"
+              stroke-dasharray="276" stroke-dashoffset="96" stroke-linecap="round"/>
+          </svg>
+          <div class="circle-text">6</div>
+        </div>
+        <div class="word">CHOCO<span class="syl">LAT</span></div>
+        <div class="chain">
+          <span class="chip">MAISON</span><span class="chip">SONNET</span><span class="chip">NETTOYAGE</span><span class="chip last">CHOCOLAT</span>
+        </div>
+        <input class="input-field" type="text" placeholder="Commence par LAT…">
+      </div></div>
+    </div>
+
+    <!-- Emerald -->
+    <div class="mockup-wrap">
+      <div class="mockup-label">Emerald</div>
+      <div class="mockup"><div class="game v-emerald">
+        <div class="header"><div>Score <span>12</span></div><div>Record <span>18</span></div></div>
+        <div class="circle-wrap">
+          <svg width="100" height="100" style="position:absolute;transform:rotate(-90deg)">
+            <circle cx="50" cy="50" r="44" fill="none" stroke="#e0e0e0" stroke-width="4"/>
+            <circle cx="50" cy="50" r="44" fill="none" stroke="#10b981" stroke-width="4"
+              stroke-dasharray="276" stroke-dashoffset="96" stroke-linecap="round"/>
+          </svg>
+          <div class="circle-text">6</div>
+        </div>
+        <div class="word">CHOCO<span class="syl">LAT</span></div>
+        <div class="chain">
+          <span class="chip">MAISON</span><span class="chip">SONNET</span><span class="chip">NETTOYAGE</span><span class="chip last">CHOCOLAT</span>
+        </div>
+        <input class="input-field" type="text" placeholder="Commence par LAT…">
+      </div></div>
+    </div>
+
+    <!-- Orange -->
+    <div class="mockup-wrap">
+      <div class="mockup-label">Orange</div>
+      <div class="mockup"><div class="game v-orange">
+        <div class="header"><div>Score <span>12</span></div><div>Record <span>18</span></div></div>
+        <div class="circle-wrap">
+          <svg width="100" height="100" style="position:absolute;transform:rotate(-90deg)">
+            <circle cx="50" cy="50" r="44" fill="none" stroke="#e0e0e0" stroke-width="4"/>
+            <circle cx="50" cy="50" r="44" fill="none" stroke="#f97316" stroke-width="4"
+              stroke-dasharray="276" stroke-dashoffset="96" stroke-linecap="round"/>
+          </svg>
+          <div class="circle-text">6</div>
+        </div>
+        <div class="word">CHOCO<span class="syl">LAT</span></div>
+        <div class="chain">
+          <span class="chip">MAISON</span><span class="chip">SONNET</span><span class="chip">NETTOYAGE</span><span class="chip last">CHOCOLAT</span>
+        </div>
+        <input class="input-field" type="text" placeholder="Commence par LAT…">
+      </div></div>
+    </div>
+
+    <!-- Rose -->
+    <div class="mockup-wrap">
+      <div class="mockup-label">Rose</div>
+      <div class="mockup"><div class="game v-rose">
+        <div class="header"><div>Score <span>12</span></div><div>Record <span>18</span></div></div>
+        <div class="circle-wrap">
+          <svg width="100" height="100" style="position:absolute;transform:rotate(-90deg)">
+            <circle cx="50" cy="50" r="44" fill="none" stroke="#e0e0e0" stroke-width="4"/>
+            <circle cx="50" cy="50" r="44" fill="none" stroke="#f43f5e" stroke-width="4"
+              stroke-dasharray="276" stroke-dashoffset="96" stroke-linecap="round"/>
+          </svg>
+          <div class="circle-text">6</div>
+        </div>
+        <div class="word">CHOCO<span class="syl">LAT</span></div>
+        <div class="chain">
+          <span class="chip">MAISON</span><span class="chip">SONNET</span><span class="chip">NETTOYAGE</span><span class="chip last">CHOCOLAT</span>
+        </div>
+        <input class="input-field" type="text" placeholder="Commence par LAT…">
+      </div></div>
+    </div>
+
+    <!-- Sky -->
+    <div class="mockup-wrap">
+      <div class="mockup-label">Sky</div>
+      <div class="mockup"><div class="game v-sky">
+        <div class="header"><div>Score <span>12</span></div><div>Record <span>18</span></div></div>
+        <div class="circle-wrap">
+          <svg width="100" height="100" style="position:absolute;transform:rotate(-90deg)">
+            <circle cx="50" cy="50" r="44" fill="none" stroke="#e0e0e0" stroke-width="4"/>
+            <circle cx="50" cy="50" r="44" fill="none" stroke="#0ea5e9" stroke-width="4"
+              stroke-dasharray="276" stroke-dashoffset="96" stroke-linecap="round"/>
+          </svg>
+          <div class="circle-text">6</div>
+        </div>
+        <div class="word">CHOCO<span class="syl">LAT</span></div>
+        <div class="chain">
+          <span class="chip">MAISON</span><span class="chip">SONNET</span><span class="chip">NETTOYAGE</span><span class="chip last">CHOCOLAT</span>
+        </div>
+        <input class="input-field" type="text" placeholder="Commence par LAT…">
+      </div></div>
+    </div>
+
+    <!-- Amber -->
+    <div class="mockup-wrap">
+      <div class="mockup-label">Amber</div>
+      <div class="mockup"><div class="game v-amber">
+        <div class="header"><div>Score <span>12</span></div><div>Record <span>18</span></div></div>
+        <div class="circle-wrap">
+          <svg width="100" height="100" style="position:absolute;transform:rotate(-90deg)">
+            <circle cx="50" cy="50" r="44" fill="none" stroke="#e0e0e0" stroke-width="4"/>
+            <circle cx="50" cy="50" r="44" fill="none" stroke="#d97706" stroke-width="4"
+              stroke-dasharray="276" stroke-dashoffset="96" stroke-linecap="round"/>
+          </svg>
+          <div class="circle-text">6</div>
+        </div>
+        <div class="word">CHOCO<span class="syl">LAT</span></div>
+        <div class="chain">
+          <span class="chip">MAISON</span><span class="chip">SONNET</span><span class="chip">NETTOYAGE</span><span class="chip last">CHOCOLAT</span>
+        </div>
+        <input class="input-field" type="text" placeholder="Commence par LAT…">
+      </div></div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ════ GAME OVER ════ -->
+<div class="directions" id="screen-gameover">
+  <div class="dir-title">Game Over · 3 accents</div>
+  <p class="dir-desc">Dead end phonétique · récap · bouton Rejouer avec la couleur d'accent.</p>
+  <div class="mockups-grid">
+
+    <div class="mockup-wrap">
+      <div class="mockup-label">Indigo</div>
+      <div class="mockup"><div class="gameover">
+        <div class="go-reason">Dead end phonétique</div>
+        <div class="go-msg">Aucun mot français ne commence par <strong>"WICH"</strong> — fin de chaîne&nbsp;!<br><span style="font-size:0.8rem;color:#999">Tu as créé un cul-de-sac.</span></div>
+        <div class="go-scores">
+          <div class="go-score"><div class="go-val">14</div><div class="go-label">Score</div></div>
+          <div class="go-score"><div class="go-val" style="color:#6366f1">18 ★</div><div class="go-label">Record</div></div>
+        </div>
+        <div class="go-words">
+          <span class="go-word">MAISON</span><span class="go-word">SONNET</span><span class="go-word">NETTOYAGE</span>
+          <span class="go-word">AGENCEMENT</span><span class="go-word">MENTAL</span><span class="go-word">TALWEG</span>
+          <span class="go-word">GUENILLE</span><span class="go-word">DIÉSEL</span>
+          <span class="go-word" style="color:#ef4444;border-color:#ef4444">SANDWICH ✗</span>
+        </div>
+        <button class="go-btn" style="background:#6366f1">↺ Rejouer</button>
+      </div></div>
+    </div>
+
+    <div class="mockup-wrap">
+      <div class="mockup-label">Emerald</div>
+      <div class="mockup"><div class="gameover">
+        <div class="go-reason">Dead end phonétique</div>
+        <div class="go-msg">Aucun mot français ne commence par <strong>"WICH"</strong> — fin de chaîne&nbsp;!<br><span style="font-size:0.8rem;color:#999">Tu as créé un cul-de-sac.</span></div>
+        <div class="go-scores">
+          <div class="go-score"><div class="go-val">14</div><div class="go-label">Score</div></div>
+          <div class="go-score"><div class="go-val" style="color:#10b981">18 ★</div><div class="go-label">Record</div></div>
+        </div>
+        <div class="go-words">
+          <span class="go-word">MAISON</span><span class="go-word">SONNET</span><span class="go-word">NETTOYAGE</span>
+          <span class="go-word">AGENCEMENT</span><span class="go-word">MENTAL</span><span class="go-word">TALWEG</span>
+          <span class="go-word">GUENILLE</span><span class="go-word">DIÉSEL</span>
+          <span class="go-word" style="color:#ef4444;border-color:#ef4444">SANDWICH ✗</span>
+        </div>
+        <button class="go-btn" style="background:#10b981">↺ Rejouer</button>
+      </div></div>
+    </div>
+
+    <div class="mockup-wrap">
+      <div class="mockup-label">Orange</div>
+      <div class="mockup"><div class="gameover">
+        <div class="go-reason">Dead end phonétique</div>
+        <div class="go-msg">Aucun mot français ne commence par <strong>"WICH"</strong> — fin de chaîne&nbsp;!<br><span style="font-size:0.8rem;color:#999">Tu as créé un cul-de-sac.</span></div>
+        <div class="go-scores">
+          <div class="go-score"><div class="go-val">14</div><div class="go-label">Score</div></div>
+          <div class="go-score"><div class="go-val" style="color:#f97316">18 ★</div><div class="go-label">Record</div></div>
+        </div>
+        <div class="go-words">
+          <span class="go-word">MAISON</span><span class="go-word">SONNET</span><span class="go-word">NETTOYAGE</span>
+          <span class="go-word">AGENCEMENT</span><span class="go-word">MENTAL</span><span class="go-word">TALWEG</span>
+          <span class="go-word">GUENILLE</span><span class="go-word">DIÉSEL</span>
+          <span class="go-word" style="color:#ef4444;border-color:#ef4444">SANDWICH ✗</span>
+        </div>
+        <button class="go-btn" style="background:#f97316">↺ Rejouer</button>
+      </div></div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ════ START SCREEN ════ -->
+<div class="directions" id="screen-start">
+  <div class="dir-title">Écran de démarrage · 3 accents</div>
+  <p class="dir-desc">Logo + règle + exemple de chaîne + sélecteur de difficulté.</p>
+  <div class="mockups-grid">
+
+    <div class="mockup-wrap">
+      <div class="mockup-label">Indigo</div>
+      <div class="mockup"><div class="startscreen">
+        <div class="logo">Sylla<span style="color:#6366f1">bix</span></div>
+        <div class="rule-text">Trouve un mot qui commence par la <strong>dernière syllabe</strong> du mot proposé. Le son prime sur l'orthographe.</div>
+        <div class="example-box">
+          <span class="ex-word">CHOCO<span style="color:#6366f1">LAT</span></span>
+          <span class="ex-arrow">→</span>
+          <span class="ex-word"><span style="color:#6366f1">LA</span>PIN</span>
+          <span class="ex-arrow">→</span>
+          <span class="ex-word"><span style="color:#6366f1">PIN</span>GOUIN</span>
+        </div>
+        <div class="modes">
+          <div class="mode-btn"><span class="mode-name">Facile</span><span class="mode-time">15s</span></div>
+          <div class="mode-btn" style="border-color:#6366f1;background:#eef2ff"><span class="mode-name" style="color:#6366f1">Moyen</span><span class="mode-time">10s</span></div>
+          <div class="mode-btn"><span class="mode-name">Difficile</span><span class="mode-time">6s</span></div>
+        </div>
+        <button class="play-btn" style="background:#6366f1">Jouer →</button>
+        <div class="record-txt">Record : <span>18</span></div>
+      </div></div>
+    </div>
+
+    <div class="mockup-wrap">
+      <div class="mockup-label">Emerald</div>
+      <div class="mockup"><div class="startscreen">
+        <div class="logo">Sylla<span style="color:#10b981">bix</span></div>
+        <div class="rule-text">Trouve un mot qui commence par la <strong>dernière syllabe</strong> du mot proposé. Le son prime sur l'orthographe.</div>
+        <div class="example-box">
+          <span class="ex-word">CHOCO<span style="color:#10b981">LAT</span></span>
+          <span class="ex-arrow">→</span>
+          <span class="ex-word"><span style="color:#10b981">LA</span>PIN</span>
+          <span class="ex-arrow">→</span>
+          <span class="ex-word"><span style="color:#10b981">PIN</span>GOUIN</span>
+        </div>
+        <div class="modes">
+          <div class="mode-btn"><span class="mode-name">Facile</span><span class="mode-time">15s</span></div>
+          <div class="mode-btn" style="border-color:#10b981;background:#ecfdf5"><span class="mode-name" style="color:#10b981">Moyen</span><span class="mode-time">10s</span></div>
+          <div class="mode-btn"><span class="mode-name">Difficile</span><span class="mode-time">6s</span></div>
+        </div>
+        <button class="play-btn" style="background:#10b981">Jouer →</button>
+        <div class="record-txt">Record : <span>18</span></div>
+      </div></div>
+    </div>
+
+    <div class="mockup-wrap">
+      <div class="mockup-label">Orange</div>
+      <div class="mockup"><div class="startscreen">
+        <div class="logo">Sylla<span style="color:#f97316">bix</span></div>
+        <div class="rule-text">Trouve un mot qui commence par la <strong>dernière syllabe</strong> du mot proposé. Le son prime sur l'orthographe.</div>
+        <div class="example-box">
+          <span class="ex-word">CHOCO<span style="color:#f97316">LAT</span></span>
+          <span class="ex-arrow">→</span>
+          <span class="ex-word"><span style="color:#f97316">LA</span>PIN</span>
+          <span class="ex-arrow">→</span>
+          <span class="ex-word"><span style="color:#f97316">PIN</span>GOUIN</span>
+        </div>
+        <div class="modes">
+          <div class="mode-btn"><span class="mode-name">Facile</span><span class="mode-time">15s</span></div>
+          <div class="mode-btn" style="border-color:#f97316;background:#fff7ed"><span class="mode-name" style="color:#f97316">Moyen</span><span class="mode-time">10s</span></div>
+          <div class="mode-btn"><span class="mode-name">Difficile</span><span class="mode-time">6s</span></div>
+        </div>
+        <button class="play-btn" style="background:#f97316">Jouer →</button>
+        <div class="record-txt">Record : <span>18</span></div>
+      </div></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function show(id) {
+    document.querySelectorAll('.directions').forEach(d => d.classList.remove('visible'));
+    document.getElementById('screen-' + id).classList.add('visible');
+    document.querySelectorAll('.nav button').forEach((b, i) => {
+      b.classList.toggle('active', ['game','gameover','start'][i] === id);
+    });
+  }
+</script>
+</body>
+</html>

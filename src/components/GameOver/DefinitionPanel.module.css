@@ -1,0 +1,68 @@
+.panel {
+  width: 100%;
+  max-width: 560px;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 8px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.word {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.closeButton {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--color-muted);
+  font-size: 1rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  line-height: 1;
+  min-height: 32px;
+  min-width: 32px;
+}
+
+.closeButton:hover {
+  color: var(--color-text);
+}
+
+.closeButton:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.definition {
+  font-size: 0.875rem;
+  color: var(--color-muted);
+  margin: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .panel {
+    animation: panelEnter 150ms ease-out;
+  }
+
+  @keyframes panelEnter {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}

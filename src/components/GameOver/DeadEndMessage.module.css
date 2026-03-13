@@ -1,0 +1,21 @@
+.container {
+  background: var(--color-accent-bg);
+  border: 1.5px solid var(--color-accent);
+  border-radius: 8px;
+  padding: 12px 16px;
+  width: 100%;
+  max-width: 560px;
+  box-sizing: border-box;
+}
+
+.text {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
+.syllable {
+  color: #b45309; /* amber accessible : ratio ~4.8:1 sur --color-accent-bg, WCAG AA ✓ (var(--color-accent) = 3.1:1, insuffisant) */
+  font-weight: 700;
+}

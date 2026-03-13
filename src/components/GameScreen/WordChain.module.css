@@ -1,0 +1,15 @@
+.container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  gap: 8px;
+  padding: 8px 0;
+  scrollbar-width: none;
+  width: 100%;
+}
+
+.container::-webkit-scrollbar {
+  display: none;
+}

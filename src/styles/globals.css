@@ -1,0 +1,49 @@
+/* ============================================================
+   Syllabix — Global CSS Reset & Design Tokens
+   Story 3.1 | Light Amber Palette | UX1, UX11
+   ============================================================ */
+
+/* ── Design Tokens ─────────────────────────────────────────── */
+:root {
+  /* Couleurs */
+  --color-bg: #fafafa;
+  --color-surface: #f7f7f5;
+  --color-text: #111111;
+  --color-muted: #9ca3af;
+  --color-accent: #d97706; /* ⚠️ ratio ~3.1:1 sur fond clair — insuffisant seul pour du texte (WCAG AA) ; toujours doubler avec border ou fond */
+  --color-accent-bg: #fffbeb;
+  --color-border: #e0e0e0;
+  --color-success: #16a34a;
+  --color-success-bg: #f0fdf4;
+  --color-error: #dc2626;
+
+  /* Typographie */
+  --font-family: 'Inter', system-ui, sans-serif;
+  --font-size-base: 16px;
+  --line-height-base: 1.5;
+}
+
+/* ── Reset CSS ──────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* ── Root font-size (base pour les unités rem) ──────────────── */
+html {
+  font-size: var(--font-size-base);
+}
+
+/* ── Base Body ──────────────────────────────────────────────── */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

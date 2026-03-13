@@ -1,0 +1,40 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.message {
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
+  font-weight: 800;
+  color: var(--color-accent);
+  text-align: center;
+  padding: 0.5em 1em;
+  background: var(--color-accent-bg);
+  border: 2px solid var(--color-accent);
+  border-radius: 12px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .message {
+    animation: recordBurst 1.5s ease-out forwards;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .message {
+    animation: none;
+  }
+}
+
+@keyframes recordBurst {
+  0%   { opacity: 0; transform: scale(0.7); }
+  20%  { opacity: 1; transform: scale(1.05); }
+  30%  { transform: scale(1.0); }
+  80%  { opacity: 1; transform: scale(1.0); }
+  100% { opacity: 0; transform: scale(0.9); }
+}

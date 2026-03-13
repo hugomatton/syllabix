@@ -1,0 +1,42 @@
+/* src/components/GameScreen/BonusIndicator.module.css */
+
+.indicator {
+  position: absolute;
+  top: -2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 0.25em 0.75em;
+  border-radius: 999px;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+.ortho {
+  color: var(--color-accent);
+  background: var(--color-accent-bg);
+  border: 1.5px solid var(--color-accent);
+}
+
+.combo {
+  color: var(--color-success);
+  background: var(--color-success-bg);
+  border: 1.5px solid var(--color-success);
+  font-size: 1.1rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .indicator {
+    animation: bonusPop 1.5s ease-out forwards;
+  }
+}
+
+@keyframes bonusPop {
+  0%   { opacity: 0; transform: translateX(-50%) translateY(6px) scale(0.8); }
+  20%  { opacity: 1; transform: translateX(-50%) translateY(0) scale(1.05); }
+  30%  { transform: translateX(-50%) translateY(0) scale(1.0); }
+  80%  { opacity: 1; }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-8px) scale(0.9); }
+}

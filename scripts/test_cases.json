@@ -1,0 +1,332 @@
+[
+  {
+    "word": "lapin",
+    "previous": "chocolat",
+    "expected": true,
+    "note": "last_syl(chocolat)='la', first_syl(lapin)='la', dist=0"
+  },
+  {
+    "word": "lacunaire",
+    "previous": "chocolat",
+    "expected": true,
+    "note": "last_syl(chocolat)='la', first_syl(lacunaire)='la', dist=0"
+  },
+  {
+    "word": "laminer",
+    "previous": "chocolat",
+    "expected": true,
+    "note": "last_syl(chocolat)='la', first_syl(laminer)='la', dist=0"
+  },
+  {
+    "word": "lappé",
+    "previous": "chocolat",
+    "expected": true,
+    "note": "last_syl(chocolat)='la', first_syl(lappé)='la', dist=0"
+  },
+  {
+    "word": "lâchées",
+    "previous": "chocolat",
+    "expected": true,
+    "note": "last_syl(chocolat)='la', first_syl(lâchées)='la', dist=0"
+  },
+  {
+    "word": "pain",
+    "previous": "lapin",
+    "expected": true,
+    "note": "last_syl(lapin)='pɛ̃', first_syl(pain)='pɛ̃', dist=0"
+  },
+  {
+    "word": "pimpons",
+    "previous": "lapin",
+    "expected": true,
+    "note": "last_syl(lapin)='pɛ̃', first_syl(pimpons)='pɛ̃', dist=0"
+  },
+  {
+    "word": "pinceau",
+    "previous": "lapin",
+    "expected": true,
+    "note": "last_syl(lapin)='pɛ̃', first_syl(pinceau)='pɛ̃', dist=0"
+  },
+  {
+    "word": "pincé",
+    "previous": "lapin",
+    "expected": true,
+    "note": "last_syl(lapin)='pɛ̃', first_syl(pincé)='pɛ̃', dist=0"
+  },
+  {
+    "word": "pains",
+    "previous": "lapin",
+    "expected": true,
+    "note": "last_syl(lapin)='pɛ̃', first_syl(pains)='pɛ̃', dist=0"
+  },
+  {
+    "word": "zombie",
+    "previous": "maison",
+    "expected": true,
+    "note": "last_syl(maison)='zɔ̃', first_syl(zombie)='zɔ̃', dist=0"
+  },
+  {
+    "word": "zombies",
+    "previous": "maison",
+    "expected": true,
+    "note": "last_syl(maison)='zɔ̃', first_syl(zombies)='zɔ̃', dist=0"
+  },
+  {
+    "word": "zombis",
+    "previous": "maison",
+    "expected": true,
+    "note": "last_syl(maison)='zɔ̃', first_syl(zombis)='zɔ̃', dist=0"
+  },
+  {
+    "word": "zombification",
+    "previous": "maison",
+    "expected": true,
+    "note": "last_syl(maison)='zɔ̃', first_syl(zombification)='zɔ̃', dist=0"
+  },
+  {
+    "word": "zonzon",
+    "previous": "maison",
+    "expected": true,
+    "note": "last_syl(maison)='zɔ̃', first_syl(zonzon)='zɔ̃', dist=0"
+  },
+  {
+    "word": "pincerez",
+    "previous": "pain",
+    "expected": true,
+    "note": "last_syl(pain)='pɛ̃', first_syl(pincerez)='pɛ̃', dist=0 — previous monosyllabique"
+  },
+  {
+    "word": "pincions",
+    "previous": "pain",
+    "expected": true,
+    "note": "last_syl(pain)='pɛ̃', first_syl(pincions)='pɛ̃', dist=0 — previous monosyllabique"
+  },
+  {
+    "word": "peinturlurées",
+    "previous": "pain",
+    "expected": true,
+    "note": "last_syl(pain)='pɛ̃', first_syl(peinturlurées)='pɛ̃', dist=0 — previous monosyllabique"
+  },
+  {
+    "word": "été",
+    "previous": "chanté",
+    "expected": true,
+    "note": "accent/é: last_syl(chanté)='te', first_syl(été)='e' (é accentué), dist=1 — vérification normalisation accent"
+  },
+  {
+    "word": "école",
+    "previous": "chanté",
+    "expected": true,
+    "note": "accent/é: last_syl(chanté)='te', first_syl(école)='e' (é accentué), dist=1 — vérification normalisation accent"
+  },
+  {
+    "word": "étoile",
+    "previous": "chanté",
+    "expected": true,
+    "note": "accent/é: last_syl(chanté)='te', first_syl(étoile)='e' (é accentué), dist=1 — vérification normalisation accent"
+  },
+  {
+    "word": "lac",
+    "previous": "chocolat",
+    "expected": true,
+    "note": "last_syl(chocolat)='la', first_syl(lac)='lak', dist=1"
+  },
+  {
+    "word": "lame",
+    "previous": "chocolat",
+    "expected": true,
+    "note": "last_syl(chocolat)='la', first_syl(lame)='lam', dist=1"
+  },
+  {
+    "word": "abaca",
+    "previous": "chocolat",
+    "expected": true,
+    "note": "last_syl(chocolat)='la', first_syl(abaca)='a', dist=1"
+  },
+  {
+    "word": "abaissa",
+    "previous": "chocolat",
+    "expected": true,
+    "note": "last_syl(chocolat)='la', first_syl(abaissa)='a', dist=1"
+  },
+  {
+    "word": "ai",
+    "previous": "lapin",
+    "expected": true,
+    "note": "last_syl(lapin)='pɛ̃', first_syl(ai)='ɛ', dist=2"
+  },
+  {
+    "word": "aicher",
+    "previous": "lapin",
+    "expected": true,
+    "note": "last_syl(lapin)='pɛ̃', first_syl(aicher)='ɛ', dist=2"
+  },
+  {
+    "word": "aida",
+    "previous": "lapin",
+    "expected": true,
+    "note": "last_syl(lapin)='pɛ̃', first_syl(aida)='ɛ', dist=2"
+  },
+  {
+    "word": "aidai",
+    "previous": "lapin",
+    "expected": true,
+    "note": "last_syl(lapin)='pɛ̃', first_syl(aidai)='ɛ', dist=2"
+  },
+  {
+    "word": "aidaient",
+    "previous": "lapin",
+    "expected": true,
+    "note": "last_syl(lapin)='pɛ̃', first_syl(aidaient)='ɛ', dist=2"
+  },
+  {
+    "word": "ver",
+    "previous": "achevèrent",
+    "expected": true,
+    "note": "homophone: ver/verre/vers/vert partagent IPA=vɛʁ — last_syl(achevèrent)='vɛʁ', first_syl(ver)='vɛʁ', dist=0"
+  },
+  {
+    "word": "verre",
+    "previous": "achevèrent",
+    "expected": true,
+    "note": "homophone: verre IPA=vɛʁ (identique à ver/vers/vert) — last_syl(achevèrent)='vɛʁ', first_syl='vɛʁ', dist=0"
+  },
+  {
+    "word": "vers",
+    "previous": "achevèrent",
+    "expected": true,
+    "note": "homophone: vers IPA=vɛʁ (identique à ver/verre/vert) — last_syl(achevèrent)='vɛʁ', first_syl='vɛʁ', dist=0"
+  },
+  {
+    "word": "laisser",
+    "previous": "les",
+    "expected": true,
+    "note": "liaison: 'les' est un mot de liaison (IPA=le, last_syl='le'), first_syl(laisser)='le', dist=0"
+  },
+  {
+    "word": "xyztest",
+    "previous": "chocolat",
+    "expected": false,
+    "note": "'xyztest' not in dictionary"
+  },
+  {
+    "word": "flurfburg",
+    "previous": "chocolat",
+    "expected": false,
+    "note": "'flurfburg' not in dictionary"
+  },
+  {
+    "word": "tralafut",
+    "previous": "chocolat",
+    "expected": false,
+    "note": "'tralafut' not in dictionary"
+  },
+  {
+    "word": "gronkle",
+    "previous": "chocolat",
+    "expected": false,
+    "note": "'gronkle' not in dictionary"
+  },
+  {
+    "word": "blurpix",
+    "previous": "chocolat",
+    "expected": false,
+    "note": "'blurpix' not in dictionary"
+  },
+  {
+    "word": "chocolat",
+    "previous": "lapin",
+    "expected": false,
+    "note": "first_syl(chocolat)='ʃo', last_syl(lapin)=pɛ̃, dist>2"
+  },
+  {
+    "word": "lapin",
+    "previous": "lapin",
+    "expected": false,
+    "note": "first_syl(lapin)='la', last_syl(lapin)=pɛ̃, dist>2"
+  },
+  {
+    "word": "moral",
+    "previous": "lapin",
+    "expected": false,
+    "note": "first_syl(moral)='mo', last_syl(lapin)=pɛ̃, dist>2"
+  },
+  {
+    "word": "table",
+    "previous": "lapin",
+    "expected": false,
+    "note": "first_syl(table)='tabl', last_syl(lapin)=pɛ̃, dist>2"
+  },
+  {
+    "word": "nappe",
+    "previous": "lapin",
+    "expected": false,
+    "note": "first_syl(nappe)='nap', last_syl(lapin)=pɛ̃, dist>2"
+  },
+  {
+    "word": "lapin",
+    "previous": "maison",
+    "expected": false,
+    "note": "first_syl(lapin)='la', last_syl(maison)=zɔ̃, dist>2"
+  },
+  {
+    "word": "chocolat",
+    "previous": "maison",
+    "expected": false,
+    "note": "first_syl(chocolat)='ʃo', last_syl(maison)=zɔ̃, dist>2"
+  },
+  {
+    "word": "timide",
+    "previous": "maison",
+    "expected": false,
+    "note": "first_syl(timide)='ti', last_syl(maison)=zɔ̃, dist>2"
+  },
+  {
+    "word": "table",
+    "previous": "maison",
+    "expected": false,
+    "note": "first_syl(table)='tabl', last_syl(maison)=zɔ̃, dist>2"
+  },
+  {
+    "word": "nappe",
+    "previous": "maison",
+    "expected": false,
+    "note": "first_syl(nappe)='nap', last_syl(maison)=zɔ̃, dist>2"
+  },
+  {
+    "word": "lapin",
+    "previous": "xyzprev",
+    "expected": false,
+    "note": "previous hors dictionnaire et hors Lexique"
+  },
+  {
+    "word": "",
+    "previous": "chocolat",
+    "expected": false,
+    "note": "mot vide, not in dictionary"
+  },
+  {
+    "word": "la",
+    "previous": "lapin",
+    "expected": false,
+    "note": "la=article, first_syl=la, last_syl(lapin)=pɛ̃, dist=3"
+  },
+  {
+    "word": "lapin",
+    "previous": "zombification",
+    "expected": false,
+    "note": "last_syl(zombification)=sjɔ̃, first_syl(lapin)=la, dist>2"
+  },
+  {
+    "word": "moral",
+    "previous": "zombification",
+    "expected": false,
+    "note": "last_syl(zombification)=sjɔ̃, first_syl(moral)=mo, dist>2"
+  },
+  {
+    "word": "pain",
+    "previous": "les",
+    "expected": false,
+    "note": "liaison négatif: last_syl(les)='le', first_syl(pain)='pɛ̃', dist=3 > 2"
+  }
+]

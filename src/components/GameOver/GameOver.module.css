@@ -1,0 +1,87 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 48px 24px;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.label {
+  font-size: 1rem;
+  color: var(--color-muted);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.score {
+  font-size: clamp(3rem, 10vw, 6rem);
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+  line-height: 1;
+}
+
+.record {
+  font-size: 1rem;
+  color: var(--color-muted);
+  margin: 0;
+}
+
+.playButton {
+  background-color: #b45309; /* amber accessible : ratio ~4.56:1 sur blanc, WCAG AA ✓ (var(--color-accent) = 3.1:1, insuffisant) */
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  min-width: 160px;
+  min-height: 44px;
+  padding: 12px 32px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: filter 150ms ease;
+  font-family: var(--font-family);
+  margin-top: 8px;
+}
+
+.playButton:hover {
+  filter: brightness(1.1);
+}
+
+.playButton:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.chainSection {
+  width: 100%;
+  max-width: 560px;
+  position: relative;
+}
+
+.chainSection::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 24px;
+  background: linear-gradient(to right, transparent, var(--color-bg));
+  pointer-events: none;
+}
+
+.chainLabel {
+  margin: 0 0 8px 0;
+}
+
+@media (max-width: 380px) {
+  .root {
+    padding: 24px 16px;
+  }
+
+  .playButton {
+    width: 100%;
+  }
+}
