@@ -2,9 +2,17 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 import { GameOver } from './GameOver'
 import { DeadEndMessage } from './DeadEndMessage'
+import { GameDataContext } from '../App/App'
+import type { GameData } from '../../engine'
 import type { GameState } from '../../game/gameTypes'
 
 const mockDispatch = vi.fn()
+
+const mockGameData = {
+  dictionary: new Map([['chocolat', 'ʃɔkɔla'], ['lapin', 'lapɛ̃']]),
+  graph: { 'pɛ̃': ['pingouin', 'pinson'] },
+  syllables: new Map<string, string>(),
+}
 
 const baseState: GameState = {
   phase: 'game-over',
@@ -19,7 +27,11 @@ const baseState: GameState = {
 }
 
 function renderGameOver(state = baseState) {
-  return render(<GameOver state={state} dispatch={mockDispatch} />)
+  return render(
+    <GameDataContext.Provider value={mockGameData as GameData}>
+      <GameOver state={state} dispatch={mockDispatch} />
+    </GameDataContext.Provider>
+  )
 }
 
 describe('GameOver', () => {

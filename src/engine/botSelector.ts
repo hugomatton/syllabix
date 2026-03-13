@@ -72,6 +72,51 @@ export function selectBotWord(
 }
 
 /**
+ * Retourne jusqu'à `count` mots candidats valides pour une fin de partie par timeout.
+ * Filtre les mots déjà joués (chain) et la blacklist. Pas de filtre homophone :
+ * objectif pédagogique — montrer toutes les formes possibles.
+ *
+ * @param currentWord  - dernier mot joué (on cherche ses continuations)
+ * @param chain        - mots déjà joués dans la partie (exclus des suggestions)
+ * @param graph        - Record<syllabe, mots[]> pré-chargé
+ * @param dictionary   - Map<mot, IPA> pré-chargée (pour getLastSyllable)
+ * @param count        - nombre max de suggestions (défaut 5)
+ * @returns liste de mots suggérés ([] si aucun candidat ou syllabe inconnue)
+ */
+export function getSuggestions(
+  currentWord: string,
+  chain: string[],
+  graph: Record<string, string[]>,
+  dictionary: Map<string, string>,
+  count = 5,
+): string[] {
+  if (!currentWord) return []
+
+  const lastSyl = getLastSyllable(currentWord, dictionary, graph)
+  if (!lastSyl || !graph[lastSyl]) return []
+
+  const safeCount = Math.max(0, count)
+  if (safeCount === 0) return []
+
+  const chainSet = new Set(chain.map(w => w.toLowerCase()))
+
+  const filtered = [...graph[lastSyl]].filter(candidate => {
+    const lower = candidate.toLowerCase()
+    if (chainSet.has(lower)) return false
+    if (BLACKLIST.has(lower)) return false
+    return true
+  })
+
+  // Fisher-Yates shuffle
+  for (let i = filtered.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[filtered[i], filtered[j]] = [filtered[j], filtered[i]]
+  }
+
+  return filtered.slice(0, safeCount)
+}
+
+/**
  * Sélectionne le mot initial du bot pour démarrer une partie.
  * Choisit parmi STARTER_WORDS ceux dont la dernière syllabe a ≥ 5 réponses
  * dans graph.json, garantissant une bonne expérience de démarrage.

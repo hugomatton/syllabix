@@ -1,6 +1,6 @@
 // src/engine/botSelector.test.ts
 import { describe, it, expect } from 'vitest'
-import { selectBotWord, selectInitialWord } from './botSelector'
+import { selectBotWord, selectInitialWord, getSuggestions } from './botSelector'
 import { getLastSyllable } from './phonetics'
 
 import dictionaryRaw from '../../public/dictionary.json'
@@ -100,6 +100,57 @@ describe('selectBotWord — filtres chain et previousWord', () => {
     expect(results.has('latte')).toBe(false)  // déjà dans chain
     // lampe doit rester disponible
     expect(results.has('lampe')).toBe(true)
+  })
+})
+
+describe('getSuggestions', () => {
+  it('retourne au maximum count mots (défaut 5)', () => {
+    const suggestions = getSuggestions('lapin', [], graph, dictionary)
+    expect(suggestions.length).toBeLessThanOrEqual(5)
+  })
+
+  it('aucun mot retourné n\'est dans la chaîne fournie', () => {
+    const chain = ['lapin', 'chien', 'canard']
+    const suggestions = getSuggestions('lapin', chain, graph, dictionary)
+    const chainSet = new Set(chain.map(w => w.toLowerCase()))
+    for (const word of suggestions) {
+      expect(chainSet.has(word.toLowerCase())).toBe(false)
+    }
+  })
+
+  it('retourne [] pour une syllabe inconnue (currentWord absent du dictionnaire et du graph)', () => {
+    const suggestions = getSuggestions('motxyzinconnu', [], graph, dictionary)
+    expect(suggestions).toEqual([])
+  })
+
+  it('retourne [] si currentWord est une chaîne vide', () => {
+    const suggestions = getSuggestions('', [], graph, dictionary)
+    expect(suggestions).toEqual([])
+  })
+
+  it('aucun mot retourné n\'est dans la blacklist', () => {
+    // 'voilà' a l'IPA 'vwala' → getLastSyllable trouvera la clé 'la' dans le mockGraph
+    const mockGraph: Record<string, string[]> = { la: ['zzz', 'lapin', 'lampe'] }
+    const mockDict = new Map<string, string>([
+      ['voilà', 'vwala'],
+      ['zzz', 'z'],
+      ['lapin', 'lapɛ̃'],
+      ['lampe', 'lɑ̃p'],
+    ])
+    const suggestions = getSuggestions('voilà', [], mockGraph, mockDict)
+    // S'assurer que des candidats ont bien été trouvés (sinon le test est vacueux)
+    expect(suggestions.length).toBeGreaterThan(0)
+    for (const word of suggestions) {
+      expect(word).not.toBe('zzz')
+    }
+  })
+
+  it('produit des résultats variés entre deux appels (aléatoire)', () => {
+    // On a besoin d'assez de candidats pour avoir de la variété
+    const results1 = new Set(Array.from({ length: 20 }, () =>
+      getSuggestions('lapin', [], graph, dictionary)
+    ).map(arr => arr.join(',')))
+    expect(results1.size).toBeGreaterThan(1)
   })
 })
 
