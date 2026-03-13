@@ -24,6 +24,7 @@ from pathlib import Path
 LEXIQUE_PATH = Path("scripts/Lexique383.tsv")
 DICTIONARY_PATH = Path("public/dictionary.json")
 OUTPUT_PATH = Path("public/graph.json")
+SYLLABLES_PATH = Path("public/syllables.json")
 MIN_CONTINUATIONS = 2  # minimum words per graph key (FR32)
 
 # T1.1 — SAMPA→IPA mapping copied exactly from build_dictionary.py (lines 35-78)
@@ -155,6 +156,25 @@ def main():
         sample = no_syll_words[:5]
         print(f"WARNING: {len(no_syll_words)} words had no syll data (sample: {sample})")
 
+    # Export syllables.json : mot → first_syl_IPA (source de vérité pour getFirstSyllable runtime)
+    # word_syllables garantit déjà first_syl non-vide (filtré lignes 142-145) — pas de guard needed
+    syllables_first: dict[str, str] = {
+        word: first_syl
+        for word, (first_syl, _last_syl) in word_syllables.items()
+    }
+    SYLLABLES_PATH.parent.mkdir(exist_ok=True)
+    with open(SYLLABLES_PATH, 'w', encoding='utf-8') as f:
+        json.dump(syllables_first, f, ensure_ascii=False, separators=(',', ':'))
+    # Vérification intégrité syllables.json
+    with open(SYLLABLES_PATH, 'r', encoding='utf-8') as f:
+        written_syl = json.load(f)
+    if len(written_syl) != len(syllables_first):
+        raise RuntimeError(
+            f"Integrity error syllables.json: wrote {len(syllables_first)} entries "
+            f"but file contains {len(written_syl)}"
+        )
+    print(f"✓ syllables.json: {len(syllables_first):,} entries")
+
     # T4.1-T4.2 — Build raw graph: last_syl(W) → [words X where first_syl(X) == last_syl(W)]
     # First build an index: first_syl → [words that start with that syllable]
     first_syl_index: dict[str, list[str]] = defaultdict(list)
@@ -258,14 +278,18 @@ def main():
         print(f"  'lapin' in graph['la']: {lapin_present}")
         print(f"  Words starting 'la': {la_words_sample}")
 
-    # T7.3 — Size check: dictionary.json + graph.json < 5MB gzip (NFR6 — actual gzip measurement)
+    # T7.3 — Size check: dictionary.json + graph.json + syllables.json < 5MB gzip (NFR6)
     dict_size_mb = DICTIONARY_PATH.stat().st_size / 1024 / 1024
-    total_raw_mb = dict_size_mb + size_mb
-    gz_combined = len(gzip.compress(DICTIONARY_PATH.read_bytes() + OUTPUT_PATH.read_bytes()))
+    syl_size_mb = SYLLABLES_PATH.stat().st_size / 1024 / 1024
+    total_raw_mb = dict_size_mb + size_mb + syl_size_mb
+    gz_combined = len(gzip.compress(
+        DICTIONARY_PATH.read_bytes() + OUTPUT_PATH.read_bytes() + SYLLABLES_PATH.read_bytes()
+    ))
     gz_mb = gz_combined / 1024 / 1024
     status_size = "✓" if gz_mb < 5.0 else "⚠ FAIL"
     print(f"{status_size} T7.3: dictionary.json={dict_size_mb:.2f}MB + "
-          f"graph.json={size_mb:.3f}MB = {total_raw_mb:.2f}MB raw | {gz_mb:.3f}MB gzip (target <5MB)")
+          f"graph.json={size_mb:.3f}MB + syllables.json={syl_size_mb:.3f}MB = "
+          f"{total_raw_mb:.2f}MB raw | {gz_mb:.3f}MB gzip (target <5MB)")
     if gz_mb >= 5.0:
         print(f"  ⚠ NFR6 VIOLATION: combined gzip size {gz_mb:.3f}MB exceeds 5MB target")
         sys.exit(1)

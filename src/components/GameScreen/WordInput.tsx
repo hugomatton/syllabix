@@ -25,7 +25,7 @@ export function WordInput({ state, dispatch }: WordInputProps) {
   const bonusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isSubmittingRef = useRef(false)
   const gameData = useContext(GameDataContext)!
-  const { dictionary, graph } = gameData
+  const { dictionary, graph, syllables } = gameData
 
   // Cleanup des timers au démontage
   useEffect(() => {
@@ -62,7 +62,7 @@ export function WordInput({ state, dispatch }: WordInputProps) {
     if (!trimmed) return
     isSubmittingRef.current = true
 
-    const result = validateWord(trimmed, state.currentWord, dictionary, graph)
+    const result = validateWord(trimmed, state.currentWord, dictionary, graph, syllables)
 
     if (result.valid) {
       // Happy path
@@ -80,12 +80,16 @@ export function WordInput({ state, dispatch }: WordInputProps) {
 
       // Vérifier dead-end
       const lastSyl = getLastSyllable(trimmed, dictionary, graph)
-      const botWord = lastSyl ? selectBotWord(lastSyl, graph, [...state.chain, trimmed], trimmed) : null
-
-      if (!botWord) {
-        dispatch({ type: 'GAME_OVER', reason: 'dead-end', deadSyllable: lastSyl ?? undefined })
+      if (!lastSyl) {
+        // Le mot du joueur n'a aucune lastSyl dans le graph → dead-end immédiat
+        dispatch({ type: 'GAME_OVER', reason: 'dead-end', deadSyllable: undefined })
       } else {
-        dispatch({ type: 'BOT_RESPOND', word: botWord })
+        const botWord = selectBotWord(lastSyl, graph, [...state.chain, trimmed], trimmed, dictionary)
+        if (!botWord) {
+          dispatch({ type: 'GAME_OVER', reason: 'dead-end', deadSyllable: lastSyl })
+        } else {
+          dispatch({ type: 'BOT_RESPOND', word: botWord })
+        }
       }
 
       setInputValue('')
@@ -95,6 +99,10 @@ export function WordInput({ state, dispatch }: WordInputProps) {
       const targetSyl = getLastSyllable(state.currentWord, dictionary, graph)
       const errorMsg = result.reason === 'not-in-dictionary'
         ? 'Mot non reconnu dans le dictionnaire'
+        : result.reason === 'blacklisted'
+        ? 'Mot non autorisé'
+        : result.reason === 'inflection'
+        ? 'Forme fléchie du mot courant non autorisée'
         : `Ne commence pas par ${targetSyl ?? '?'}`
 
       dispatch({ type: 'SUBMIT_WORD', word: trimmed, isValid: false, error: errorMsg })

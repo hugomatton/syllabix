@@ -1,11 +1,11 @@
 // src/engine/phonetics.ts
-import { PHONETIC_TOLERANCE } from '../config'
+import { PHONETIC_TOLERANCE, BLACKLIST } from '../config'
 
 export type BonusType = 'none' | 'ortho' | 'combo' | 'both'
 
 export type ValidationResult = {
   valid: boolean
-  reason: 'not-in-dictionary' | 'wrong-syllable' | null
+  reason: 'not-in-dictionary' | 'wrong-syllable' | 'inflection' | 'blacklisted' | null
   bonusType: BonusType
   scorePoints: number
 }
@@ -86,21 +86,31 @@ export function getLastSyllable(
 
 /**
  * Retourne la première syllabe phonétique IPA d'un mot.
- * Stratégie symétrique à getLastSyllable : chercher la clé graph la plus longue
- * qui est un PRÉFIXE de l'IPA du mot (au lieu d'un suffixe).
- * Les clés de graph.json couvrent les syllabes valides du français, y compris
- * les premières syllabes — ce qui évite de dépendre de Lexique au runtime.
  *
- * Ex: getFirstSyllable("aicher", dict, graph)
+ * Stratégie principale : lookup direct dans `syllables` (mot → first_syl_IPA depuis Lexique).
+ * Fallback si absent : chercher la clé graph la plus longue qui est un PRÉFIXE de l'IPA du mot.
+ *
+ * Ex: getFirstSyllable("repasser", dict, graph, syllables)
+ *   → syllables.get("repasser") = "ʁə" → retourne "ʁə" (NFC normalisé)
+ *
+ * Ex fallback: getFirstSyllable("aicher", dict, graph, new Map())
  *   → dict.get("aicher") = "ɛʃe"
- *   → graph key "ɛ" est un préfixe de "ɛʃe" (le seul) → retourne "ɛ"
+ *   → graph key "ɛ" est un préfixe de "ɛʃe" → retourne "ɛ"
  */
 export function getFirstSyllable(
   word: string,
   dictionary: Map<string, string>,
   graph: Record<string, string[]>,
+  syllables: Map<string, string> = new Map(),
 ): string | null {
-  const ipa = dictionary.get(word.toLowerCase())
+  const wordLower = word.toLowerCase()
+
+  // Lookup direct dans syllables (source de vérité Lexique)
+  const fromSyllables = syllables.get(wordLower)
+  if (fromSyllables) return fromSyllables.normalize('NFC')
+
+  // Fallback : préfixe le plus long dans les clés graph
+  const ipa = dictionary.get(wordLower)
   if (!ipa) return null
 
   const normalizedIPA = ipa.normalize('NFC')
@@ -115,7 +125,8 @@ export function getFirstSyllable(
     }
   }
 
-  return bestKey || null
+  // Normaliser NFC pour cohérence avec le path syllables (F12)
+  return bestKey ? bestKey.normalize('NFC') : null
 }
 
 /**
@@ -173,27 +184,61 @@ export function getLastTwoSyllables(
  * @param currentWord mot courant du bot (dans le dictionnaire, last syllable = graph key)
  * @param dictionary  Map<mot, IPA> pré-chargée
  * @param graph       Record<syllabe, mots[]> pré-chargé
+ * @param syllables   Map<mot, first_syl_IPA> depuis syllables.json (optionnel, fallback si absent)
  */
 export function validateWord(
   input: string,
   currentWord: string,
   dictionary: Map<string, string>,
   graph: Record<string, string[]>,
+  syllables: Map<string, string> = new Map(),
 ): ValidationResult {
   const normalizedInput = input.toLowerCase().trim()
+
+  // Étape 0 : rejeter les mots blacklistés (onomatopées, formes parasites…)
+  if (BLACKLIST.has(normalizedInput)) {
+    return { valid: false, reason: 'blacklisted', bonusType: 'none', scorePoints: 1 }
+  }
 
   // Étape 1 : le mot doit être dans le dictionnaire (FR10)
   const inputIPA = dictionary.get(normalizedInput)
   if (!inputIPA) return { valid: false, reason: 'not-in-dictionary', bonusType: 'none', scorePoints: 1 }
 
+  // Étape 1bis : rejeter les formes fléchies du mot courant (bidirectionnel)
+  // Direction A : input est le stem du currentWord → "songe" après "songes" ("songe"+"s"="songes")
+  // Direction B : input est l'inflexion du currentWord → "pains" après "pain" ("pain"+"s"="pains")
+  // Note: si currentIPA est absent (bot word hors dict — invariant impossible en jeu normal),
+  // le break déclenche quand même le skip vers l'étape 2 qui retournera wrong-syllable.
+  const currentWordLower = currentWord.toLowerCase()
+  const currentIPA = dictionary.get(currentWordLower)
+  const suffixes = ['aux', 'es', 's', 'e']  // ordre : plus long d'abord
+  if (currentIPA) {
+    const normalizedCurrentIPA = currentIPA.normalize('NFC')
+    const normalizedInputIPA = inputIPA.normalize('NFC')
+    for (const suffix of suffixes) {
+      // Direction A : input + suffix = currentWord (joueur soumet le singulier/base)
+      if (normalizedInput + suffix === currentWordLower) {
+        if (normalizedInputIPA === normalizedCurrentIPA) {
+          return { valid: false, reason: 'inflection', bonusType: 'none', scorePoints: 1 }
+        }
+        break
+      }
+      // Direction B : currentWord + suffix = input (joueur soumet le pluriel/fléchi)
+      if (currentWordLower + suffix === normalizedInput) {
+        if (normalizedInputIPA === normalizedCurrentIPA) {
+          return { valid: false, reason: 'inflection', bonusType: 'none', scorePoints: 1 }
+        }
+        break
+      }
+    }
+  }
+
   // Étape 2 : obtenir la dernière syllabe du mot courant (clé graph garantie car bot word)
   const targetSyl = getLastSyllable(currentWord, dictionary, graph)
   if (!targetSyl) return { valid: false, reason: 'wrong-syllable', bonusType: 'none', scorePoints: 1 }
 
-  // Étape 3 : obtenir la première syllabe de l'input via les clés graph (préfixe le plus long)
-  // Symétrique à getLastSyllable : évite de découper en milieu de séquence combinante
-  // et réplique fidèlement la logique Lexique (first_syl) sans dépendance runtime
-  const firstSyl = getFirstSyllable(normalizedInput, dictionary, graph)
+  // Étape 3 : obtenir la première syllabe de l'input via syllables (lookup O(1)) ou graph-prefix (fallback)
+  const firstSyl = getFirstSyllable(normalizedInput, dictionary, graph, syllables)
 
   let inputStart: string
   if (firstSyl) {

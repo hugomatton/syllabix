@@ -21,7 +21,7 @@ export function GameOver({ state, dispatch }: GameOverProps) {
 
   return (
     <div className={styles.root}>
-      {state.gameOverReason === 'dead-end' && state.deadSyllable && (
+      {state.gameOverReason === 'dead-end' && (
         <DeadEndMessage syllable={state.deadSyllable} />
       )}
       <p className={styles.label} id="gameover-score-label">Score final</p>

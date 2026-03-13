@@ -83,6 +83,24 @@ describe('selectBotWord — filtres chain et previousWord', () => {
     const result = selectBotWord(syl, graph, candidates, '')
     expect(result).toBeNull()
   })
+
+  it('ne retourne pas un homophone d\'un mot déjà dans la chaîne (pluriel/féminin)', () => {
+    // lattes et latte ont le même IPA — si latte est dans la chaîne, lattes doit être exclu
+    const mockDict = new Map<string, string>([
+      ['latte', 'lat'],
+      ['lattes', 'lat'],
+      ['lampe', 'lɑ̃p'],
+    ])
+    const mockGraph: Record<string, string[]> = { la: ['latte', 'lattes', 'lampe'] }
+    // chain contient 'latte' → lattes doit être filtré (même IPA)
+    const results = new Set(Array.from({ length: 30 }, () =>
+      selectBotWord('la', mockGraph, ['latte'], '', mockDict)
+    ))
+    expect(results.has('lattes')).toBe(false)
+    expect(results.has('latte')).toBe(false)  // déjà dans chain
+    // lampe doit rester disponible
+    expect(results.has('lampe')).toBe(true)
+  })
 })
 
 describe('selectInitialWord', () => {

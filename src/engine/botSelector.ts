@@ -1,6 +1,7 @@
 // src/engine/botSelector.ts
 
 import { getLastSyllable } from './phonetics'
+import { BLACKLIST } from '../config'
 
 /**
  * Mots français communs utilisés pour démarrer une partie.
@@ -31,6 +32,7 @@ export const STARTER_WORDS = [
  * @param graph        - Record<syllabe, mots[]> pré-chargé depuis graph.json
  * @param chain        - mots déjà joués dans la partie (bot + joueur), pour exclure les doublons
  * @param previousWord - mot soumis par le joueur, pour exclure les terminaisons orthographiques
+ * @param dictionary   - Map<mot, IPA> pour exclure les homophones de mots déjà joués (pluriels, féminins…)
  * @returns mot bot aléatoire, ou null si lastSyllable inconnue ou tous les candidats filtrés
  */
 export function selectBotWord(
@@ -38,6 +40,7 @@ export function selectBotWord(
   graph: Record<string, string[]>,
   chain: string[] = [],
   previousWord: string = '',
+  dictionary: Map<string, string> = new Map(),
 ): string | null {
   const candidates = graph[lastSyllable]
   if (!candidates || candidates.length === 0) return null
@@ -45,12 +48,22 @@ export function selectBotWord(
   const chainSet = new Set(chain.map(w => w.toLowerCase()))
   const lowerPrev = previousWord.toLowerCase()
 
+  // IPA de tous les mots déjà joués — exclure les candidats avec la même prononciation (pluriels, féminins…)
+  const chainIPAs = new Set(
+    chain.map(w => dictionary.get(w.toLowerCase())?.normalize('NFC')).filter(Boolean) as string[]
+  )
+
   const filtered = candidates.filter(candidate => {
     const lowerCandidate = candidate.toLowerCase()
-    // Exclure les doublons de chaîne
+    // Exclure les doublons de chaîne (orthographe identique)
     if (chainSet.has(lowerCandidate)) return false
     // Exclure les terminaisons orthographiques du mot précédent
     if (lowerPrev && lowerPrev.endsWith(lowerCandidate)) return false
+    // Exclure les homophones de mots déjà joués (même IPA NFC = même mot effectivement)
+    const candidateIPA = dictionary.get(lowerCandidate)?.normalize('NFC')
+    if (candidateIPA && chainIPAs.has(candidateIPA)) return false
+    // Exclure les mots blacklistés
+    if (BLACKLIST.has(lowerCandidate)) return false
     return true
   })
 

@@ -45,14 +45,26 @@ describe('getLastSyllable', () => {
 })
 
 describe('getFirstSyllable', () => {
-  it('retourne "lap" pour "lapin" (lap = plus long préfixe de lapɛ̃ dans graph)', () => {
+  it('retourne "lap" pour "lapin" (lap = plus long préfixe de lapɛ̃ dans graph) — fallback sans syllables', () => {
     expect(getFirstSyllable('lapin', dictionary, graph)).toBe('lap')
   })
-  it('retourne "ɛ" pour "aicher" (ɛ = préfixe de ɛʃe, clé graph)', () => {
+  it('retourne "ɛ" pour "aicher" (ɛ = préfixe de ɛʃe, clé graph) — fallback sans syllables', () => {
     expect(getFirstSyllable('aicher', dictionary, graph)).toBe('ɛ')
   })
   it('retourne null pour un mot absent du dictionnaire', () => {
     expect(getFirstSyllable('motinexistant', dictionary, graph)).toBeNull()
+  })
+  it('AC2 — utilise syllables map en priorité sur le fallback graph-prefix (happy path)', () => {
+    // Simule syllables.get('repasser') = 'ʁə' — lookupO(1) depuis Lexique
+    const mockSyllables = new Map<string, string>([['repasser', 'ʁə']])
+    const result = getFirstSyllable('repasser', dictionary, graph, mockSyllables)
+    expect(result).toBe('ʁə')
+  })
+  it('AC2 — retourne le fallback graph-prefix quand mot absent de syllables', () => {
+    // syllables vide → fallback → comportement pré-T3
+    const emptySyllables = new Map<string, string>()
+    const result = getFirstSyllable('lapin', dictionary, graph, emptySyllables)
+    expect(result).toBe('lap')  // même résultat que le test fallback ci-dessus
   })
 })
 
@@ -207,6 +219,47 @@ describe('validateWord — combo syllabe double (AC2, FR17)', () => {
     expect(result.valid).toBe(true)
     expect(result.bonusType).toBe('combo')
     expect(result.scorePoints).toBe(3)
+  })
+})
+
+describe('validateWord — filtre inflexions (AC3 tech-spec)', () => {
+  it('AC3 — direction A : player soumet singulier du mot courant (même IPA)', () => {
+    // songe IPA = sɔ̃ʒ, songes IPA = sɔ̃ʒ
+    // "songe" + "s" = "songes" (currentWord) ET IPA identique → inflexion
+    const result = validateWord('songe', 'songes', dictionary, graph)
+    expect(result.valid).toBe(false)
+    expect(result.reason).toBe('inflection')
+    expect(result.bonusType).toBe('none')
+  })
+  it('AC3 — direction B : player soumet pluriel du mot courant (même IPA)', () => {
+    // pain IPA = pɛ̃, pains IPA = pɛ̃
+    // currentWord="pain", "pain"+"s"="pains"=input → inflexion
+    const mockDict = new Map<string, string>([['pain', 'pɛ̃'], ['pains', 'pɛ̃']])
+    const mockGraph: Record<string, string[]> = { pɛ̃: ['pain', 'pains'] }
+    const result = validateWord('pains', 'pain', mockDict, mockGraph)
+    expect(result.valid).toBe(false)
+    expect(result.reason).toBe('inflection')
+  })
+  it('ne rejette pas les mots valides dont le stem+suffix ≠ currentWord', () => {
+    // "lapin" + suffixes ≠ "chocolat" → pas d'inflexion
+    const result = validateWord('lapin', 'chocolat', dictionary, graph)
+    expect(result.valid).toBe(true)
+    expect(result.reason).toBeNull()
+  })
+  it('ne rejette pas quand IPA différent malgré correspondance orthographique avec suffix', () => {
+    // "verre" et "verres" ont même IPA (vɛʁ) → inflexion correctement rejetée
+    // Mais "ver" (vɛʁ) et "verres" (vɛʁ) → aussi inflexion si "ver"+"s"="vers"≠"verres"
+    // Test : "ver" + "s" = "vers" ≠ "verres" → pas d'inflexion → résultat phonétique normal
+    const mockDict = new Map<string, string>([
+      ['verres', 'vɛʁ'],  // currentWord
+      ['ver', 'vɛʁ'],     // player submits — ver+s=vers≠verres → pas inflexion
+    ])
+    const mockGraph: Record<string, string[]> = { vɛʁ: ['verres', 'ver'] }
+    const result = validateWord('ver', 'verres', mockDict, mockGraph)
+    // Pas d'inflexion car "ver"+"s"="vers" ≠ "verres"
+    // Mais phonétiquement valid : firstSyl("ver")="vɛʁ", targetSyl="vɛʁ", dist=0
+    expect(result.reason).not.toBe('inflection')
+    expect(result.valid).toBe(true)
   })
 })
 

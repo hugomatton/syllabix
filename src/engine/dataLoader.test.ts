@@ -6,28 +6,27 @@ describe('loadGameData', () => {
     vi.restoreAllMocks()
   })
 
-  it('charge dictionary en Map et graph en Record', async () => {
+  it('charge dictionary en Map, graph en Record et syllables en Map', async () => {
     const mockDict = { lapin: 'lapɛ̃', chocolat: 'ʃokola' }
     const mockGraph = { la: ['lapin', 'lac'], 'pɛ̃': ['pain', 'peindre'] }
+    const mockSyllables = { lapin: 'la', chocolat: 'ʃo' }
 
     vi.stubGlobal('fetch', vi.fn()
-      .mockResolvedValueOnce({
-        json: async () => mockDict,
-        ok: true,
-      } as Response)
-      .mockResolvedValueOnce({
-        json: async () => mockGraph,
-        ok: true,
-      } as Response)
+      .mockResolvedValueOnce({ json: async () => mockDict, ok: true } as Response)
+      .mockResolvedValueOnce({ json: async () => mockGraph, ok: true } as Response)
+      .mockResolvedValueOnce({ json: async () => mockSyllables, ok: true } as Response)
     )
 
-    const { dictionary, graph } = await loadGameData()
+    const { dictionary, graph, syllables } = await loadGameData()
 
     expect(dictionary).toBeInstanceOf(Map)
     expect(dictionary.get('lapin')).toBe('lapɛ̃')
     expect(dictionary.size).toBe(2)
     expect(graph).toEqual(mockGraph)
     expect(graph['la']).toContain('lapin')
+    expect(syllables).toBeInstanceOf(Map)
+    expect(syllables.get('lapin')).toBe('la')
+    expect(syllables.size).toBe(2)
   })
 
   it('rejette si fetch échoue (erreur réseau)', async () => {
@@ -39,6 +38,7 @@ describe('loadGameData', () => {
     vi.stubGlobal('fetch', vi.fn()
       .mockResolvedValueOnce({ ok: false, status: 404, json: async () => ({}) } as Response)
       .mockResolvedValueOnce({ ok: true, json: async () => ({}), } as Response)
+      .mockResolvedValueOnce({ ok: true, json: async () => ({}), } as Response)
     )
     await expect(loadGameData()).rejects.toThrow('404')
   })
@@ -47,25 +47,37 @@ describe('loadGameData', () => {
     vi.stubGlobal('fetch', vi.fn()
       .mockResolvedValueOnce({ ok: true, json: async () => ({ mot: 'ipa' }) } as Response)
       .mockResolvedValueOnce({ ok: false, status: 500, json: async () => ({}) } as Response)
+      .mockResolvedValueOnce({ ok: true, json: async () => ({}) } as Response)
     )
     await expect(loadGameData()).rejects.toThrow('500')
   })
 
-  it('utilise Promise.all — les deux fetch sont appelés en parallèle', async () => {
+  it('rejette si le serveur retourne une erreur HTTP (ex: 503 syllables)', async () => {
+    vi.stubGlobal('fetch', vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ mot: 'ipa' }) } as Response)
+      .mockResolvedValueOnce({ ok: true, json: async () => ({}) } as Response)
+      .mockResolvedValueOnce({ ok: false, status: 503, json: async () => ({}) } as Response)
+    )
+    await expect(loadGameData()).rejects.toThrow('503')
+  })
+
+  it('utilise Promise.all — les trois fetch sont appelés en parallèle', async () => {
     const mockDict = { mot: 'ipa' }
     const mockGraph = { ipa: ['mot'] }
+    const mockSyllables = { mot: 'ip' }
     const fetchMock = vi.fn()
       .mockResolvedValueOnce({ json: async () => mockDict, ok: true } as Response)
       .mockResolvedValueOnce({ json: async () => mockGraph, ok: true } as Response)
+      .mockResolvedValueOnce({ json: async () => mockSyllables, ok: true } as Response)
 
     vi.stubGlobal('fetch', fetchMock)
 
     await loadGameData()
 
-    // Les deux fetch ont été déclenchés
-    expect(fetchMock).toHaveBeenCalledTimes(2)
+    expect(fetchMock).toHaveBeenCalledTimes(3)
     expect(fetchMock).toHaveBeenCalledWith('/dictionary.json')
     expect(fetchMock).toHaveBeenCalledWith('/graph.json')
+    expect(fetchMock).toHaveBeenCalledWith('/syllables.json')
   })
 
   it('convertit correctement le dictionnaire en Map avec toutes les entrées', async () => {
@@ -75,6 +87,7 @@ describe('loadGameData', () => {
     vi.stubGlobal('fetch', vi.fn()
       .mockResolvedValueOnce({ json: async () => mockDict, ok: true } as Response)
       .mockResolvedValueOnce({ json: async () => mockGraph, ok: true } as Response)
+      .mockResolvedValueOnce({ json: async () => ({}), ok: true } as Response)
     )
 
     const { dictionary } = await loadGameData()
@@ -93,6 +106,7 @@ describe('loadGameData', () => {
     vi.stubGlobal('fetch', vi.fn()
       .mockResolvedValueOnce({ json: async () => mockDict, ok: true } as Response)
       .mockResolvedValueOnce({ json: async () => mockGraph, ok: true } as Response)
+      .mockResolvedValueOnce({ json: async () => ({}), ok: true } as Response)
     )
 
     const { graph } = await loadGameData()

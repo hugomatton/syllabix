@@ -2,8 +2,8 @@
 title: 'Robustesse du moteur phonétique V1'
 slug: 'phonetic-engine-robustness'
 created: '2026-03-13'
-status: 'in-progress'
-stepsCompleted: [1, 2]
+status: 'Completed'
+stepsCompleted: [1, 2, 3, 4]
 tech_stack: ['TypeScript', 'React', 'Vitest', 'Python 3', 'Vite']
 files_to_modify:
   - 'scripts/build_graph.py'
@@ -321,3 +321,8 @@ Then: 0 régression
 - **miroir → blocage** : à reproduire en jeu pendant l'implémentation. 439 successeurs dans graph["aʁ"] → `selectBotWord` ne devrait pas retourner null. Peut-être un problème de UI freeze ou de race condition dans le dispatch. À investiguer.
 - **machisme → mener** (dist=4 même avec syllables.json) : rejet phonétiquement correct, non corrigé
 - **néfaste → fastes**, **hideux → deux** : valides selon les règles du jeu (même pattern que lapin → pain), non corrigés
+
+## Review Notes
+- Revue adversariale complétée
+- Findings : 12 total, 4 corrigés (F1 commentaire, F7 budget gzip, F10 dead code, F12 NFC fallback), 8 ignorés (hors scope spec ou by design)
+- Approche : auto-fix

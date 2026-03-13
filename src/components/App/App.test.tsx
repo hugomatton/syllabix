@@ -39,6 +39,7 @@ describe('App', () => {
     vi.stubGlobal('fetch', vi.fn()
       .mockResolvedValueOnce({ ok: true, json: async () => mockDict } as Response)
       .mockResolvedValueOnce({ ok: true, json: async () => mockGraph } as Response)
+      .mockResolvedValueOnce({ ok: true, json: async () => ({}) } as Response)
     )
     render(<App />)
     const title = await screen.findByRole('heading', { level: 1, name: 'Syllabix' })

@@ -85,9 +85,10 @@ describe('GameOver', () => {
     expect(screen.queryByRole('status')).not.toBeInTheDocument()
   })
 
-  it('T5.2.5 — DeadEndMessage absent quand gameOverReason === "dead-end" mais deadSyllable undefined', () => {
+  it('T5.2.5 — DeadEndMessage affiché avec message générique quand gameOverReason === "dead-end" et deadSyllable undefined (AC4)', () => {
     renderGameOver({ ...baseState, gameOverReason: 'dead-end', deadSyllable: undefined })
-    expect(screen.queryByRole('status')).not.toBeInTheDocument()
+    expect(screen.getByRole('status')).toBeInTheDocument()
+    expect(screen.getByText(/Ce mot ne peut être suivi — fin de chaîne !/)).toBeInTheDocument()
   })
 })
 

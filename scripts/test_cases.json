@@ -328,5 +328,11 @@
     "previous": "les",
     "expected": false,
     "note": "liaison négatif: last_syl(les)='le', first_syl(pain)='pɛ̃', dist=3 > 2"
+  },
+  {
+    "word": "songe",
+    "previous": "songes",
+    "expected": false,
+    "note": "inflexion : songe = singulier de songes, même IPA sɔ̃ʒ — doit être rejeté"
   }
 ]
