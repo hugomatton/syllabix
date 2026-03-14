@@ -42,7 +42,7 @@
   font-size: 1rem;
   cursor: pointer;
   transition: filter 150ms ease;
-  font-family: var(--font-family);
+  font-family: var(--font-ui);
   margin-top: 8px;
 }
 
@@ -97,7 +97,7 @@
   border-radius: 6px;
   padding: 6px 12px;
   font-size: 0.95rem;
-  font-family: var(--font-family);
+  font-family: var(--font-ui);
   color: var(--color-text);
   cursor: pointer;
   transition: border-color 150ms ease, color 150ms ease;

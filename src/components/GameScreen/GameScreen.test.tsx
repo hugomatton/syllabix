@@ -8,6 +8,7 @@ import type { GameState } from '../../game'
 // ⚠️ CRITIQUE : mocker useTimer pour éviter rAF + dispatch dans les tests
 vi.mock('../../hooks', () => ({
   useTimer: vi.fn(),
+  useVisualViewport: vi.fn(() => 800),
   useGameState: vi.fn(() => ({
     state: {
       phase: 'idle',

@@ -18,7 +18,9 @@
   --color-error: #dc2626;
 
   /* Typographie */
-  --font-family: 'Inter', system-ui, sans-serif;
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-ui: 'Inter', system-ui, sans-serif;
+  --font-family: var(--font-ui); /* alias legacy */
   --font-size-base: 16px;
   --line-height-base: 1.5;
 }
@@ -39,7 +41,7 @@ html {
 body {
   margin: 0;
   padding: 0;
-  font-family: var(--font-family);
+  font-family: var(--font-ui);
   font-size: var(--font-size-base);
   line-height: var(--line-height-base);
   background-color: var(--color-bg);

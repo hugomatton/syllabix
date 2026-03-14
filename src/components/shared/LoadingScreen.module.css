@@ -9,5 +9,5 @@
 .message {
   color: #9ca3af; /* TODO: Story 3.1 migrera vers var(--color-muted) */
   font-size: 1rem;
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: var(--font-ui);
 }

@@ -17,7 +17,7 @@
   padding: 10px 16px;
   min-height: 44px;
   cursor: pointer;
-  font-family: var(--font-family);
+  font-family: var(--font-ui);
   font-size: 0.9rem;
   color: var(--color-text);
   transition: border-color 150ms ease, background-color 150ms ease;

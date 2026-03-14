@@ -1,7 +1,11 @@
 ---
-stepsCompleted: ['step-01-init', 'step-02-discovery', 'step-02b-vision', 'step-02c-executive-summary', 'step-03-success', 'step-04-journeys', 'step-05-domain', 'step-06-innovation', 'step-07-project-type', 'step-08-scoping', 'step-09-functional', 'step-10-nonfunctional', 'step-11-polish', 'step-12-complete']
+stepsCompleted: ['step-01-init', 'step-02-discovery', 'step-02b-vision', 'step-02c-executive-summary', 'step-03-success', 'step-04-journeys', 'step-05-domain', 'step-06-innovation', 'step-07-project-type', 'step-08-scoping', 'step-09-functional', 'step-10-nonfunctional', 'step-11-polish', 'step-12-complete', 'step-e-01-discovery', 'step-e-02-review', 'step-e-03-edit']
 workflow_completed: true
 completed_at: '2026-03-06'
+lastEdited: '2026-03-14'
+editHistory:
+  - date: '2026-03-14'
+    changes: 'DA, expérience mobile (FR35/36), clavier persistant, définitions in-app sans perte de session (FR29), parcours mobile ajouté, fixes SMART (FR5/8/22/23/25), FR37 déplacée en contrainte design, critère succès DA ajouté, connexion standard définie'
 inputDocuments: ['_bmad-output/brainstorming/brainstorming-session-2026-03-06-2015.md']
 workflowType: 'prd'
 classification:
@@ -25,6 +29,8 @@ Syllabix est un jeu de mots web grand public : un humain et un bot s'enchaînent
 
 Cible : francophones amateurs de jeux de mots accessibles, sans contrainte de progression ni streak. Public de référence : Semantix, Pedantix. Pas de compte requis, pas de dark patterns.
 
+Identité visuelle : Syllabix adopte une esthétique de "jeu culturel" — typographie marquée, palette sobre, loin des codes SaaS modernes. Le référentiel stylistique est Pedantix/Semantix : objet numérique singulier, pas une application générique.
+
 ### Ce qui rend Syllabix spécial
 
 Dans l'espace des jeux de mots français (Wordle, Semantix, Pedantix, Motus), aucun ne joue sur la **phonétique des syllabes**. Syllabix occupe un angle inédit : la chaîne de sons. Simple à comprendre en une partie, profonde via la pression du chrono et la richesse du dictionnaire.
@@ -47,6 +53,10 @@ Pari produit : une bonne expérience suffit. Pas d'addiction forcée, pas de not
 - Projet personnel open access — aucun objectif de croissance ni de monétisation
 - Coût infra : <5€/mois, idéalement zéro
 - Zéro dépendance à une API payante en V1
+
+### Succès Design
+
+- Direction artistique validée par revue avant lancement V1 : l'interface est distinguable d'une app SaaS générique et cohérente avec le référentiel Pedantix/Semantix
 
 ### Succès Technique
 
@@ -83,7 +93,8 @@ Pari produit : une bonne expérience suffit. Pas d'addiction forcée, pas de not
 - Bonus orthographe + combo double syllabe
 - Détection dead end + message pédagogique
 - Récap fin de partie avec définitions cliquables
-- UI ultra-minimaliste, responsive
+- Direction artistique distincte : typographie forte, palette sobre, esthétique "jeu culturel" (référence Pedantix/Semantix) — pas un look SaaS générique. **Contrainte de design non négociable** : validée par revue avant lancement V1
+- UI responsive, expérience mobile conçue pour tenir dans le viewport sans scroll pendant la partie
 - Explication minimaliste des règles visible sur la page
 - Retour visuel et sonore léger à chaque validation
 
@@ -124,7 +135,11 @@ Pari produit : une bonne expérience suffit. Pas d'addiction forcée, pas de not
 
 **Lucie, 28 ans, graphiste.** Elle répond **"SANDWICH"** au mot du bot. Syllabe finale : "WICH". Le graphe de transitions ne trouve aucune continuation. La partie s'arrête : *"Aucun mot français ne commence par 'WICH' — fin de chaîne !"* Lucie réalise qu'elle a créé un cul-de-sac. Elle parcourt le récap, clique sur quelques définitions. Elle apprend. Elle rejoue.
 
-### Parcours 4 — Hugo en admin
+### Parcours 4 — Partie sur mobile
+
+**Camille, 26 ans, joue depuis son téléphone.** Elle ouvre Syllabix dans son navigateur mobile. La page s'affiche : le mot du bot, le chrono, la zone de saisie et son score sont tous visibles dans l'écran sans qu'elle n'ait besoin de scroller. Le clavier virtuel s'affiche automatiquement au lancement de la partie. Elle tape sa réponse. La validation s'affiche. Le clavier reste présent — elle n'a pas à le rappeler entre chaque mot. En fin de partie, elle veut savoir ce que signifie "LIMERICK". Elle appuie sur le mot dans le récap : une définition s'ouvre directement dans l'application, sans la faire quitter la page. Elle rejoue.
+
+### Parcours 5 — Hugo en admin
 
 Hugo déploie la V1. Le dictionnaire (Lexique, 130k+ formes) est embarqué. Le graphe de transitions est pré-calculé une fois à l'installation. Si un bug phonétique remonte, il met à jour le seuil de tolérance dans la config et redéploie. Coût mensuel : 0€.
 
@@ -139,8 +154,11 @@ Hugo déploie la V1. Le dictionnaire (Lexique, 130k+ formes) est embarqué. Le g
 | 3 modes de difficulté | 2 |
 | Détection dead end + message pédagogique | 3 |
 | Récap fin de partie avec définitions cliquables | 3 |
-| Dictionnaire exhaustif + graphe pré-calculé | 4 |
-| Seuil de tolérance configurable | 4 |
+| Dictionnaire exhaustif + graphe pré-calculé | 5 |
+| Seuil de tolérance configurable | 5 |
+| Éléments de jeu visibles sans scroll sur mobile | 4 |
+| Clavier virtuel persistant dans la zone de jeu | 4 |
+| Consultation de définition sans quitter l'application | 4 |
 
 ---
 
@@ -165,13 +183,13 @@ Hugo déploie la V1. Le dictionnaire (Lexique, 130k+ formes) est embarqué. Le g
 - **FR2 :** Le bot peut proposer un mot valide du dictionnaire pour initier ou continuer une chaîne
 - **FR3 :** Le joueur peut soumettre un mot via le clavier pour répondre au mot du bot
 - **FR4 :** Le système peut valider si le mot soumis commence phonétiquement par la dernière syllabe du mot précédent
-- **FR5 :** Le joueur peut voir le mot actuel du bot clairement affiché pendant sa réflexion
+- **FR5 :** Le joueur peut voir le mot actuel du bot affiché dans la zone de jeu sans action de sa part
 - **FR6 :** La chaîne peut continuer indéfiniment jusqu'à une condition d'arrêt
 
 ### Moteur de Validation Phonétique
 
 - **FR7 :** Le système peut comparer les mots sur base phonétique (IPA) indépendamment de l'orthographe
-- **FR8 :** Le système peut appliquer une zone de tolérance pour les cas limites phonétiques
+- **FR8 :** Le système peut appliquer une tolérance phonétique (distance d'édition IPA ≤ 2, valeur configurable) pour accepter les cas limites sans rejeter les approximations proches
 - **FR9 :** Le système peut détecter si la syllabe finale d'un mot crée un dead end dans le graphe de transitions
 - **FR10 :** Le système peut vérifier si un mot soumis est présent dans le dictionnaire
 - **FR11 :** Le bot peut sélectionner uniquement des mots dont la syllabe finale garantit au moins une continuation possible
@@ -194,19 +212,23 @@ Hugo déploie la V1. Le dictionnaire (Lexique, 130k+ formes) est embarqué. Le g
 
 ### Interface & Feedback
 
-- **FR22 :** Le joueur peut lire une explication minimaliste des règles sur la page principale
-- **FR23 :** Le joueur peut recevoir un retour visuel immédiat après chaque validation
+- **FR22 :** Le joueur peut lire une explication des règles en ≤ 3 lignes, visible sur la page principale sans interaction préalable
+- **FR23 :** Le joueur peut recevoir un retour visuel dans les 300ms suivant la validation d'un mot
 - **FR24 :** Le joueur peut recevoir un retour sonore après chaque validation
-- **FR25 :** Le joueur peut voir clairement pourquoi son mot est refusé (hors dictionnaire ou mauvaise syllabe)
+- **FR25 :** Le joueur peut lire un message explicite indiquant la raison du refus : mot hors dictionnaire ou syllabe de départ incorrecte
 
 ### Fin de Partie
 
 - **FR26 :** Le système peut déclencher une fin de partie lorsque le joueur crée un dead end phonétique
 - **FR27 :** Le joueur peut lire un message explicatif en cas de défaite par dead end (*"Aucun mot français ne commence par X"*)
 - **FR28 :** Le joueur peut accéder à un récap de tous les mots de la chaîne en fin de partie
-- **FR29 :** Le joueur peut consulter la définition de chaque mot du récap
+- **FR29 :** Le joueur peut consulter la définition complète de chaque mot du récap (lemme de référence, pas la forme fléchie) sans quitter l'application ni perdre sa session
 - **FR30 :** Le joueur peut relancer une nouvelle partie depuis l'écran de fin
 
+### Expérience Mobile
+
+- **FR35 :** Sur mobile, les éléments de jeu actifs (mot courant, chrono, zone de saisie, score) sont intégralement visibles dans le viewport sans scroll vertical pendant une partie
+- **FR36 :** Dans la zone de jeu sur mobile, le clavier virtuel reste affiché en continu et ne peut pas être masqué par l'utilisateur
 ### Administration & Build
 
 - **FR31 :** L'administrateur peut générer `dictionary.json` avec l'IPA pré-calculé de chaque mot
@@ -221,7 +243,7 @@ Hugo déploie la V1. Le dictionnaire (Lexique, 130k+ formes) est embarqué. Le g
 ### Performance
 
 - Validation d'un mot soumis : <300ms côté joueur
-- Chargement initial (dictionary.json + graph.json) : <2s sur connexion standard
+- Chargement initial (dictionary.json + graph.json) : <2s sur connexion 4G / 10 Mbps
 - Chrono : précision ±100ms
 - Zéro calcul phonétique en temps réel — toute comparaison est une lookup JSON
 
@@ -236,6 +258,7 @@ Hugo déploie la V1. Le dictionnaire (Lexique, 130k+ formes) est embarqué. Le g
 - Taille de police minimale : 16px sur mobile
 - Focus clavier fonctionnel sur tous les éléments interactifs
 - Responsive : jouable sur mobile (320px+) et desktop
+- Layout mobile : l'intégralité des éléments de jeu actifs tient dans le viewport (hauteur disponible après affichage du clavier virtuel) sans scroll vertical
 
 ### Fiabilité
 

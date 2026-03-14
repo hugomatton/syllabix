@@ -85,3 +85,9 @@ development_status:
   6-1-configuration-vite-pour-github-pages: done
   6-2-deploiement-github-pages: in-progress
   epic-6-retrospective: optional
+
+  # Epic 7 : Direction Artistique, Expérience Mobile & Définitions In-App
+  epic-7: in-progress
+  7-1-direction-artistique-fraunces-look-jeu-culturel: done
+  7-2-experience-mobile-viewport-lock-clavier-persistant: review
+  epic-7-retrospective: optional

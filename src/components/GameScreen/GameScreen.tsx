@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, type Dispatch } from 'react'
 import type { GameAction, GameState, Difficulty } from '../../game'
-import { useTimer } from '../../hooks'
+import { useTimer, useVisualViewport } from '../../hooks'
 import { TIMER_EASY, TIMER_MEDIUM, TIMER_HARD } from '../../config'
 import { TimerRing } from './TimerRing'
 import { BotWord } from './BotWord'
@@ -26,6 +26,7 @@ interface GameScreenProps {
 
 export function GameScreen({ state, dispatch }: GameScreenProps) {
   useTimer(dispatch, state)
+  const viewportHeight = useVisualViewport()
 
   const totalDuration = getTotalDuration(state.difficulty)
 
@@ -56,7 +57,7 @@ export function GameScreen({ state, dispatch }: GameScreenProps) {
   }, [])
 
   return (
-    <main className={styles.root}>
+    <main className={styles.root} style={{ height: `${viewportHeight}px`, overflow: 'hidden' }}>
       <RecordBurst active={showBurst} />
       <div className={styles.topRow}>
         <ScoreDisplay score={state.score} sessionRecord={state.sessionRecord} />

@@ -2,8 +2,12 @@
 stepsCompleted: ['step-01-init', 'step-02-discovery', 'step-03-core-experience', 'step-04-emotional-response', 'step-05-inspiration', 'step-06-design-system', 'step-07-defining-experience', 'step-08-visual-foundation', 'step-09-design-directions', 'step-10-user-journeys', 'step-11-component-strategy', 'step-12-ux-patterns', 'step-13-responsive-accessibility', 'step-14-complete']
 workflow_completed: true
 completed_at: '2026-03-07'
+lastEdited: '2026-03-14'
 lastStep: 14
 inputDocuments: ['_bmad-output/planning-artifacts/prd.md', '_bmad-output/planning-artifacts/architecture.md']
+editHistory:
+  - date: '2026-03-14'
+    changes: 'Fraunces display font, DA jeu culturel, mobile visualViewport + clavier persistant, DefinitionPanel iframe Wiktionnaire, parcours Camille ajouté'
 workflowType: 'ux-design'
 project_name: 'syllabix'
 user_name: 'Hugo'
@@ -246,12 +250,20 @@ Interaction établie (saisir → Entrée → feedback) + twist phonétique. Pas 
 
 ### Système Typographique
 
-- **Police** : `Inter` (Google Fonts) avec fallback `system-ui, sans-serif`
-- **Mot du bot** : `clamp(2.5rem, 8vw, 5rem)` — gros, responsive, héros de l'écran
-- **Input joueur** : `1.25rem` — confortable à lire en tapant
-- **Score / Chrono** : `1rem`, `font-variant-numeric: tabular-nums` (pas de jitter)
-- **Messages** : `0.875rem`, couleur sémantique (success/error/muted)
-- **Règle du jeu** : `0.875rem`, couleur muted, discret
+**Font pairing — identité "jeu culturel" :**
+
+- **Display** : `Fraunces` (Google Fonts, variable optique) — titre Syllabix + mot du bot. Caractère littéraire et joueur, rare dans l'espace web apps → différenciation immédiate. Fallback : `Georgia, serif`.
+- **UI** : `Inter` (Google Fonts) — tout le reste (input, score, chrono, messages, labels). Fallback : `system-ui, sans-serif`.
+
+**Échelle typographique :**
+- **Titre Syllabix** : `Fraunces`, `1.5rem`, `font-weight: 700`, couleur `--color-accent`
+- **Mot du bot** : `Fraunces`, `clamp(2.5rem, 8vw, 5rem)`, `font-weight: 700` — héros de l'écran
+- **Input joueur** : `Inter`, `1.25rem` — confortable à lire en tapant
+- **Score / Chrono** : `Inter`, `1rem`, `font-variant-numeric: tabular-nums` (pas de jitter)
+- **Messages** : `Inter`, `0.875rem`, couleur sémantique (success/error/muted)
+- **Règle du jeu** : `Inter`, `0.875rem`, couleur muted, discret
+
+**Chargement :** `display=swap` sur les deux polices — jamais de FOUT bloquant.
 
 ### Espacement & Layout
 
@@ -301,6 +313,27 @@ Interaction établie (saisir → Entrée → feedback) + twist phonétique. Pas 
 ### Rationale
 
 Amber = chaleur + accessibilité + différenciation dans un espace dominé par le bleu/violet. La structure Arcade (chrono circulaire + chaîne visible) renforce le sentiment de progression et la transparence du jeu.
+
+### Direction Artistique — Contrainte Non Négociable
+
+**Objectif :** Syllabix doit ressembler à un objet culturel fait main, pas à une application SaaS.
+
+**Référentiel :** Pedantix / Semantix — editorial, sobre, typographié, sans chrome d'interface générique.
+
+**Ce qui crée l'identité "jeu culturel" :**
+- `Fraunces` sur le titre et le mot du bot — la typographie EST le design principal
+- Fond `#fafafa` + surface `#f7f7f5` — presque blanc, papier, pas d'écran
+- Accent amber `#d97706` utilisé avec parcimonie — uniquement sur les éléments clés (chrono, focus, bouton primaire)
+- Zéro gradient, zéro ombre portée marquée, zéro glassmorphisme
+- Pas de logo complexe — le nom "Syllabix" en `Fraunces` + accent amber EST le logo
+- Interfaces vides plutôt que remplies : chaque élément affiché a une raison d'être
+
+**Ce qu'il faut éviter absolument :**
+- Border-radius > 8px sur les conteneurs principaux (carte-SaaS)
+- Boutons avec icônes inutiles
+- Header/navbar visible pendant le jeu
+- Animations "app" (skeleton loaders, spinners)
+- Toute couleur de fond autre que les tokens définis
 
 ---
 
@@ -383,8 +416,8 @@ flowchart TD
     G --> H[Game Over\nMessage pédagogique :\nAucun mot français ne commence\npar WICH — fin de chaîne !]
     H --> I[Écran Récap\nChaîne complète en chips\nChaque mot cliquable]
     I --> J{Lucie explore}
-    J -->|Clic sur un mot| K[Définition affichée]
-    K --> J
+    J -->|Clic sur un mot| K[Modale DefinitionPanel\niframe Wiktionnaire lemme\nSans changer d'onglet]
+    K -->|Ferme modale| J
     J -->|Clic Rejouer| L[StartScreen]
     D -->|Hors dictionnaire| M[Message inline\nInput reste actif]
     M --> C
@@ -395,6 +428,35 @@ flowchart TD
 - Dead end = découverte, pas punition → ton informatif, pas accusateur
 - Récap = micro-session apprentissage passive
 - L'effet "wow, je savais pas ça" est le pic mémorable de ce parcours
+
+---
+
+### Parcours 4 — Mobile (Camille)
+
+Camille, 26 ans, joue depuis son iPhone. Contrainte critique : tout doit tenir dans le viewport avec le clavier ouvert.
+
+```mermaid
+flowchart TD
+    A([Ouvre Syllabix sur iPhone]) --> B[StartScreen\nCharge en < 2s]
+    B --> C[Clic Jouer\nFocus auto WordInput\nClavier virtuel s'ouvre]
+    C --> D{GameScreen\nvisualViewport.height calculé\nLayout ajusté — tout visible}
+    D --> E[TimerRing + BotWord + WordInput\nvisibles sans scroll]
+    E --> F{Tape un mot + Entrée}
+    F -->|Validé| G[Flash vert\nRe-focus immédiat\nClavier reste ouvert]
+    G --> E
+    F -->|Refusé| H[Message inline\nRe-focus immédiat\nClavier reste ouvert]
+    H --> F
+    E -->|Chrono expire| I[Game Over]
+    I --> J[GameOverScreen\nChaîne récap]
+    J -->|Clic WordChip| K[DefinitionPanel\niframe Wiktionnaire\nin-app, sans quitter]
+    K -->|Ferme| J
+    J -->|Rejouer| B
+```
+
+**Moments clés :**
+- Le clavier reste affiché sans interruption sur toute la partie
+- Aucun scroll requis — `visualViewport` API gère l'espace disponible
+- Les définitions s'ouvrent in-app — la session n'est pas interrompue
 
 ---
 
@@ -522,11 +584,32 @@ Syllabix utilise **CSS Modules custom + CSS tokens globaux** — zéro lib exter
 **Accessibilité :** `role="status"`.
 
 #### `DefinitionPanel`
-**Purpose :** Définition d'un mot du récap sur clic d'un `WordChip`.
-**Usage :** GameOverScreen — inline sous la chaîne.
-**Anatomy :** Mot en titre + définition, bouton de fermeture.
-**States :** `hidden` · `open` (slide-down ou fade-in)
-**Accessibilité :** `role="dialog"`, `aria-modal="true"`, focus trap, `aria-label="Définition de [MOT]"`.
+**Purpose :** Définition d'un mot du récap — affichée in-app sans quitter ni changer d'onglet.
+**Usage :** GameOverScreen, déclenchée par clic sur un `WordChip`.
+**Anatomy :** Modale avec iframe Wiktionnaire + bouton fermeture. Le joueur consulte la page Wiktionnaire du lemme du mot sans naviguer.
+
+**Stratégie lemme :** l'URL Wiktionnaire pointée est toujours le **lemme** du mot (forme de base), jamais la forme fléchie. Ex : "chantions" → `https://fr.wiktionary.org/wiki/chanter`. La résolution lemme → URL est gérée côté applicatif (lookup dictionnaire ou table de lemmatisation simple).
+
+**States :**
+- `hidden` — pas de DOM rendu
+- `loading` — iframe en cours de chargement (spinner discret)
+- `open` — iframe visible, contenu Wiktionnaire affiché
+
+**Anatomy détaillée :**
+```
+┌─────────────────────────────────┐
+│  Définition : LAPIN         [×] │
+│ ─────────────────────────────── │
+│  [iframe fr.wiktionary.org/...] │
+│  (hauteur fixe, scrollable)     │
+│ ─────────────────────────────── │
+│  [Ouvrir sur Wiktionnaire ↗]    │  ← escape hatch optionnel
+└─────────────────────────────────┘
+```
+
+**Accessibilité :** `role="dialog"`, `aria-modal="true"`, focus trap sur ouverture, `Escape` pour fermer, `aria-label="Définition de [MOT]"`.
+
+**Fallback :** si l'iframe échoue à charger (réseau, CSP), afficher un bouton "Ouvrir sur Wiktionnaire" qui ouvre un nouvel onglet — jamais de page vide.
 
 ---
 
@@ -657,10 +740,12 @@ Au démarrage, `dictionary.json` et `graph.json` sont chargés en parallèle :
 - `pointer-events: none` — le joueur continue à taper pendant l'animation
 - Pas de backdrop sombre
 
-**`DefinitionPanel` (inline, GameOverScreen uniquement) :**
-- S'ouvre inline sous le `WordChip` cliqué — pas de modale flottante
+**`DefinitionPanel` (modale iframe, GameOverScreen uniquement) :**
+- S'ouvre en modale centrée avec iframe Wiktionnaire (lemme du mot)
 - Un seul panel ouvert à la fois
-- Fermeture : clic sur le même chip ou sur la croix ; `Escape` sur desktop
+- Fermeture : clic sur la croix, `Escape`, ou clic sur le backdrop
+- L'utilisateur ne quitte pas l'application — aucun changement d'onglet
+- Fallback si iframe KO : bouton "Ouvrir sur Wiktionnaire" (nouvel onglet)
 
 **Règle globale :** aucune modale ne bloque le retour à la partie.
 
@@ -706,6 +791,55 @@ La structure Arcade (colonne centrée, max-width 640px) fonctionne identiquement
 - Navigation clavier complète (Tab, Enter, Escape)
 
 **Tablet (480px–767px) :** comportement desktop appliqué dès 480px.
+
+---
+
+### Mobile — Contraintes Critiques (Viewport & Clavier)
+
+#### Problème
+
+Sur mobile, le clavier virtuel réduit le viewport disponible. Sans gestion explicite :
+- Le `TimerRing` (en haut) sort du viewport visible → joueur aveugle sur le chrono
+- Le scroll devient possible → rupture de flux
+- Le clavier se referme si le focus est perdu → friction majeure
+
+#### Contrainte Fondamentale
+
+**Pendant une partie, tous les éléments actifs (chrono, mot bot, input, score) doivent tenir dans la zone visible sans aucun scroll.**
+
+#### Solution — `visualViewport` API
+
+```js
+// Hauteur disponible après affichage du clavier virtuel
+const availableHeight = window.visualViewport.height;
+// Appliquer au conteneur de jeu
+gameContainer.style.height = `${availableHeight}px`;
+```
+
+Le composant `GameScreen` écoute `visualViewport.resize` et ajuste sa hauteur en temps réel. Le layout interne s'adapte via `flex + gap` proportionnel à la hauteur disponible.
+
+**Implémentation :**
+- `GameScreen` : `height: 100dvh` par défaut, overridé par `visualViewport.height` sur `resize`
+- Layout interne : `display: flex; flex-direction: column; justify-content: space-between`
+- `TimerRing` : taille fixe (ne se compresse pas)
+- `BotWord` : `clamp()` — se compresse légèrement si hauteur contrainte
+- `WordChain` : `max-height` limité, overflow horizontal scroll uniquement
+- `WordInput` : ancré en bas, toujours visible
+
+#### Persistance du Clavier
+
+Le clavier virtuel se referme si le `WordInput` perd le focus. **Il ne doit jamais perdre le focus pendant une partie.**
+
+**Règles :**
+- Re-focus `WordInput` immédiatement après chaque validation (succès ou erreur)
+- Aucun autre élément ne prend le focus pendant `playing` (tous en `tabindex="-1"`)
+- Pas de `blur()` programmatique pendant `playing`
+- Sur iOS : utiliser `inputRef.current.focus()` dans un `setTimeout(0)` pour contourner les restrictions WebKit
+
+**Testing obligatoire :**
+- iPhone Safari réel (pas simulateur) : clavier visible en continu sur 10 mots enchaînés
+- Android Chrome : idem
+- Vérifier que `TimerRing` reste visible avec le clavier ouvert sur 320px de large
 
 ---
 

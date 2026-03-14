@@ -3,7 +3,11 @@ stepsCompleted: ['step-01-init', 'step-02-context', 'step-03-starter', 'step-04-
 lastStep: 8
 status: 'complete'
 completedAt: '2026-03-06'
+lastEdited: '2026-03-14'
 inputDocuments: ['_bmad-output/planning-artifacts/prd.md']
+editHistory:
+  - date: '2026-03-14'
+    changes: 'Ajout DA/Fraunces, useVisualViewport hook, DefinitionModal iframe Wiktionnaire + lemmatisation, lemmes.json, mise à jour FR count 34→36'
 workflowType: 'architecture'
 project_name: 'syllabix'
 user_name: 'Hugo'
@@ -544,6 +548,176 @@ Toutes les décisions sont documentées avec justifications, l'arbre de fichiers
 **Points forts :** séparation nette des couches, zéro backend = déploiement trivial, patterns anti-conflit IA exhaustifs, séquence d'implémentation claire.
 
 **Axes d'amélioration futurs :** CI/CD automatisé, bot narquois expressif (V2), LLM fallback phonétique (V2).
+
+---
+
+## Révision Architecturale — 2026-03-14
+
+_Trois nouveaux besoins issus de la révision PRD/UX : direction artistique (Fraunces), expérience mobile contrainte (visualViewport), définitions in-app (iframe Wiktionnaire + lemmatisation)._
+
+### 1. Direction Artistique — Chargement des Polices
+
+**Décision :** font pairing `Fraunces` (display) + `Inter` (UI), chargées via Google Fonts.
+
+**Implémentation dans `index.html` :**
+```html
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+```
+
+**Mise à jour `globals.css` :**
+```css
+--font-display: 'Fraunces', Georgia, serif;   /* titre + mot du bot */
+--font-ui:      'Inter', system-ui, sans-serif; /* tout le reste */
+```
+
+**Impact :** aucun changement structurel — uniquement `index.html` et `globals.css`.
+
+---
+
+### 2. Mobile Viewport — Hook `useVisualViewport`
+
+**Problème :** le clavier virtuel mobile réduit le viewport disponible. Sans gestion explicite, le `TimerRing` sort de l'écran et le scroll devient possible.
+
+**Décision :** nouveau hook `src/hooks/useVisualViewport.ts` écoutant `window.visualViewport.resize`.
+
+```typescript
+// src/hooks/useVisualViewport.ts
+export function useVisualViewport() {
+  const [height, setHeight] = useState(
+    window.visualViewport?.height ?? window.innerHeight
+  )
+  useEffect(() => {
+    const vv = window.visualViewport
+    if (!vv) return
+    const onResize = () => setHeight(vv.height)
+    vv.addEventListener('resize', onResize)
+    return () => vv.removeEventListener('resize', onResize)
+  }, [])
+  return height
+}
+```
+
+**Consommation dans `GameScreen` :**
+```typescript
+const viewportHeight = useVisualViewport()
+// appliqué via style inline sur le conteneur de jeu
+<div style={{ height: viewportHeight }} className={styles.gameContainer}>
+```
+
+**Règle de focus — clavier persistant :**
+- `WordInput` ne perd jamais le focus pendant `phase === 'playing'`
+- Re-focus via `inputRef.current?.focus()` dans un `setTimeout(0)` après chaque dispatch (contournement WebKit iOS)
+- Tous les autres éléments : `tabindex="-1"` pendant `playing`
+
+**Nouveaux fichiers :**
+- `src/hooks/useVisualViewport.ts` ← nouveau
+
+**Mise à jour barrel :**
+- `src/hooks/index.ts` : exporter `useVisualViewport`
+
+---
+
+### 3. Définitions In-App — Iframe Wiktionnaire + Lemmatisation
+
+#### 3a. Analyse CSP / X-Frame-Options
+
+**Contrainte :** pour qu'une iframe vers `fr.wiktionary.org` fonctionne, Wiktionary ne doit pas envoyer `X-Frame-Options: DENY` ou `Content-Security-Policy: frame-ancestors 'none'`.
+
+**Vérification :** Wikimedia (Wiktionary) n'envoie pas de header `X-Frame-Options` bloquant par défaut — les iframes vers `fr.wiktionary.org` sont autorisées côté serveur Wiktionary. ✅
+
+**Côté Syllabix (GitHub Pages) :** aucune configuration CSP n'est envoyée par défaut. Aucun header à ajouter.
+
+**Fallback obligatoire :** si l'iframe échoue à charger (`onerror`, timeout 5s), afficher un bouton "Ouvrir sur Wiktionnaire ↗" (`target="_blank"`, `rel="noopener"`).
+
+#### 3b. Lemmatisation — `lemmes.json`
+
+**Problème :** Wiktionary montre une définition pauvre pour les formes fléchies (ex. "chantions → forme conjuguée de chanter"). Il faut pointer vers le lemme.
+
+**Décision :** générer `public/lemmes.json` (mot → lemme) à partir du champ `lemme` de `Lexique383.tsv`.
+
+**Mise à jour `scripts/build_graph.py` :**
+```python
+# Extraire la correspondance mot → lemme depuis Lexique383
+lemmes = {}
+for row in lexique:
+    word = row['ortho'].lower()
+    lemme = row['lemme'].lower()
+    if word != lemme:
+        lemmes[word] = lemme
+# Écrire public/lemmes.json
+```
+
+**Structure `lemmes.json` :**
+```json
+{
+  "chantions": "chanter",
+  "chevaux": "cheval",
+  "beaux": "beau"
+}
+```
+
+Mots absents du fichier = déjà un lemme (pas de lookup nécessaire).
+
+**Chargement dans `dataLoader.ts` :**
+```typescript
+const [dict, graph, syllables, lemmes] = await Promise.all([
+  fetch('/dictionary.json').then(r => r.json()),
+  fetch('/graph.json').then(r => r.json()),
+  fetch('/syllables.json').then(r => r.json()),
+  fetch('/lemmes.json').then(r => r.json()),  // ← nouveau
+])
+```
+
+**Nouvelle fonction dans `src/engine/phonetics.ts` :**
+```typescript
+export function getLemme(word: string, lemmes: Record<string, string>): string {
+  return lemmes[word.toLowerCase()] ?? word.toLowerCase()
+}
+```
+
+**URL Wiktionnaire construite dans `DefinitionModal` :**
+```typescript
+const lemme = getLemme(word, lemmes)
+const url = `https://fr.wiktionary.org/wiki/${encodeURIComponent(lemme)}`
+```
+
+#### 3c. Composant `DefinitionModal`
+
+**Remplacement de `WordDefinition.tsx`** par `DefinitionModal.tsx` — modale avec iframe.
+
+```
+src/components/GameOver/
+├── GameOver.tsx
+├── GameOver.module.css
+├── ChainRecap.tsx
+├── DefinitionModal.tsx    ← renommé + refactorisé (était WordDefinition.tsx)
+└── DefinitionModal.module.css
+```
+
+**States du composant :**
+- `hidden` — aucun DOM
+- `loading` — iframe en cours, spinner discret
+- `loaded` — iframe visible
+- `error` — iframe échouée → bouton fallback
+
+**Mapping FR → fichier mis à jour :**
+
+| Domaine | FRs | Localisation |
+|---|---|---|
+| Fin de partie + Définitions (FR26-30, FR35-36) | Récap + modal iframe | `src/components/GameOver/` |
+| Mobile viewport (FR35) | Hook visualViewport | `src/hooks/useVisualViewport.ts` |
+| Lemmatisation | getLemme() | `src/engine/phonetics.ts` |
+| Build lemmes | build_graph.py étendu | `scripts/build_graph.py` |
+
+**Nouveaux fichiers :**
+- `public/lemmes.json` ← généré par `build_graph.py`
+- `src/hooks/useVisualViewport.ts`
+- `src/components/GameOver/DefinitionModal.tsx`
+- `src/components/GameOver/DefinitionModal.module.css`
+
+**Note FR count :** le PRD compte désormais **36 FRs** (FR1-FR36) — FR37 a été déplacée en contrainte de design dans le Périmètre Produit.
 
 ### Handoff Implémentation
 

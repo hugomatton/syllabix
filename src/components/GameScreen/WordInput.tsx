@@ -93,7 +93,7 @@ export function WordInput({ state, dispatch }: WordInputProps) {
       }
 
       setInputValue('')
-      inputRef.current?.focus()
+      setTimeout(() => inputRef.current?.focus(), 0)
     } else {
       // Error path
       const targetSyl = getLastSyllable(state.currentWord, dictionary, graph)
@@ -110,7 +110,7 @@ export function WordInput({ state, dispatch }: WordInputProps) {
       playErrorSound()
       showError(errorMsg)
       inputRef.current?.select()
-      inputRef.current?.focus()
+      setTimeout(() => inputRef.current?.focus(), 0)
     }
   }
 

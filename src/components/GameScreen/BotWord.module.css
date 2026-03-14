@@ -1,6 +1,7 @@
 .word {
+  font-family: var(--font-display);
   font-size: clamp(2.5rem, 8vw, 5rem);
-  font-weight: 800;
+  font-weight: 700;
   text-align: center;
   color: var(--color-text);
   margin: 0;

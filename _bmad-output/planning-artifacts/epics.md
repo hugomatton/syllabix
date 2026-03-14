@@ -764,3 +764,142 @@ Afin que le jeu soit accessible publiquement sans coût. (NFR5, NFR11)
 **Given** le déploiement
 **When** j'exécute l'audit axe sur l'URL de production
 **Then** il n'y a aucune violation "critical" ou "serious" (NFR7–NFR9)
+
+---
+
+## Epic 7 : Direction Artistique, Expérience Mobile & Définitions In-App
+
+Suite à la revue UX du 2026-03-14, trois axes d'amélioration ont été identifiés : l'identité visuelle est trop générique (SaaS moderne), l'expérience mobile est dégradée (chrono invisible, scroll possible, clavier masquable), et la consultation de définitions fait quitter l'application. Cet epic implémente la direction artistique "jeu culturel" avec Fraunces, le verrouillage du viewport mobile avec `visualViewport` API, et les définitions in-app via iframe Wiktionnaire pointant vers le lemme de chaque mot.
+
+**FRs couverts :** FR5 (bot word visible), FR29 (définition sans quitter l'app), FR35 (viewport sans scroll), FR36 (clavier persistant)
+**Contrainte design :** DA validée par revue avant lancement — non négociable
+
+### Story 7.1 : Direction Artistique — Fraunces + Look "Jeu Culturel"
+
+En tant que joueur,
+Je veux une interface visuellement distincte, dans l'esthétique des jeux culturels comme Pedantix/Semantix,
+Afin que Syllabix ait une identité propre, loin des codes SaaS génériques.
+
+**Acceptance Criteria :**
+
+**Given** `index.html` charge les fonts
+**When** la page se charge
+**Then** Fraunces (display, variable) et Inter (UI) sont chargées via Google Fonts avec `<link>` preconnect
+**And** le fallback `Georgia, serif` est défini pour Fraunces, `system-ui, sans-serif` pour Inter
+
+**Given** `src/styles/globals.css` existe
+**When** je l'inspecte
+**Then** `--font-display: 'Fraunces', Georgia, serif` est défini
+**And** `--font-ui: 'Inter', system-ui, sans-serif` est défini
+**And** le reste des design tokens existants est préservé (couleurs, espacement)
+
+**Given** le titre "Syllabix" dans `StartScreen`
+**When** il s'affiche
+**Then** il utilise `font-family: var(--font-display)`, `font-weight: 700`, taille `clamp(3rem, 10vw, 6rem)`
+**And** la couleur est `--color-accent` (#d97706)
+
+**Given** le mot du bot dans `BotWord`
+**When** il s'affiche
+**Then** il utilise `font-family: var(--font-display)`, `font-weight: 700`, taille `clamp(2.5rem, 8vw, 5rem)`
+**And** la couleur est `--color-text` (#111111)
+
+**Given** l'ensemble de l'interface
+**When** je l'inspecte visuellement
+**Then** aucun gradient CSS n'est présent sur les éléments principaux
+**And** aucun `box-shadow` décoratif (drop shadow) n'est présent
+**And** aucun glassmorphism (`backdrop-filter`) n'est présent
+**And** `border-radius` des conteneurs principaux est ≤ 8px
+**And** l'accent amber (#d97706) est utilisé uniquement sur les éléments clés (titre, accent, focus)
+
+**Given** le CSS des composants UI (TimerRing, WordInput, ScoreDisplay, boutons)
+**When** je l'inspecte
+**Then** tous utilisent `font-family: var(--font-ui)`
+**And** les éléments interactifs ont `outline` amber au focus (UX8)
+
+---
+
+### Story 7.2 : Expérience Mobile — Viewport Lock & Clavier Persistant
+
+En tant que joueur sur mobile,
+Je veux que tous les éléments de jeu soient visibles sans scroll et que le clavier reste affiché en permanence,
+Afin de jouer confortablement sur téléphone sans perdre le contrôle de l'interface. (FR35, FR36)
+
+**Acceptance Criteria :**
+
+**Given** `src/hooks/useVisualViewport.ts` existe
+**When** il est importé
+**Then** il exporte `useVisualViewport(): number` qui retourne `window.visualViewport?.height ?? window.innerHeight`
+**And** il écoute l'événement `resize` sur `window.visualViewport` pour mettre à jour la valeur
+**And** il retire le listener au démontage (cleanup dans `useEffect`)
+
+**Given** le jeu est en phase `'playing'` sur mobile
+**When** le clavier virtuel s'ouvre
+**Then** `GameScreen` utilise `useVisualViewport()` pour définir sa hauteur inline : `style={{ height: viewportHeight + 'px' }}`
+**And** le layout interne utilise `display: flex; flex-direction: column; justify-content: space-between`
+**And** TimerRing, BotWord, WordChain, WordInput et ScoreDisplay sont tous visibles sans scroll vertical (FR35)
+
+**Given** `WordInput` en phase `'playing'`
+**When** le composant est monté ou que le joueur soumet un mot
+**Then** `inputRef.current?.focus()` est appelé dans `setTimeout(0)` (workaround WebKit iOS)
+**And** le clavier virtuel reste affiché en continu sans interruption (FR36)
+
+**Given** tous les autres éléments interactifs de la page (boutons hors zone de jeu, liens)
+**When** la phase est `'playing'`
+**Then** ils ont `tabindex="-1"` pour éviter qu'un Tab involontaire ne déplace le focus hors de `WordInput`
+
+**Given** le test sur appareils réels
+**When** je teste sur iPhone Safari et Android Chrome
+**Then** aucun scroll vertical n'est possible pendant le jeu
+**And** le clavier reste affiché pendant toute la durée d'une partie
+**And** tous les éléments sont lisibles (taille min 16px) (NFR8)
+
+---
+
+### Story 7.3 : Définitions In-App — lemmes.json + DefinitionModal iframe Wiktionnaire
+
+En tant que joueur,
+Je veux consulter la définition de n'importe quel mot du récap sans quitter l'application,
+Afin d'apprendre sans perdre ma session ni changer d'onglet. (FR29)
+
+**Acceptance Criteria :**
+
+**Given** `scripts/build_graph.py` est mis à jour
+**When** je l'exécute
+**Then** il génère `public/lemmes.json` avec le format `{ "chantions": "chanter", "chevaux": "cheval", ... }`
+**And** seuls les mots dont la forme fléchie diffère du lemme sont inclus (les mots déjà à leur forme lemme sont omis)
+**And** toutes les clés et valeurs sont en minuscules normalisées
+
+**Given** `src/engine/phonetics.ts`
+**When** je l'inspecte
+**Then** il exporte `getLemme(word: string, lemmes: Record<string, string>): string`
+**And** `getLemme` retourne `lemmes[word.toLowerCase()] ?? word.toLowerCase()`
+
+**Given** `src/data/dataLoader.ts`
+**When** les données sont chargées
+**Then** `lemmes.json` est chargé dans le `Promise.all` existant (pattern ARC11)
+**And** `lemmes` est disponible en tant que `Record<string, string>` dans le game state ou passé aux composants concernés
+
+**Given** `src/components/GameOver/DefinitionModal.tsx` remplace `DefinitionPanel`
+**When** un joueur clique sur un `WordChip` dans le récap
+**Then** une modale s'ouvre avec un `<iframe>` pointant vers `https://fr.wiktionary.org/wiki/${encodeURIComponent(getLemme(word, lemmes))}`
+**And** l'iframe a `title="Définition Wiktionnaire"`, `width="100%"`, `height="100%"`
+**And** la modale a un bouton de fermeture accessible (Escape + clic overlay + bouton ×)
+
+**Given** la modale est en état `loading`
+**When** l'iframe charge
+**Then** un indicateur de chargement est visible (texte "Chargement…" ou spinner léger)
+
+**Given** la modale est en état `error` (iframe `onError` déclenché)
+**When** le chargement échoue
+**Then** un lien de fallback "Ouvrir sur Wiktionnaire ↗" est affiché (target="_blank" rel="noopener")
+**And** ce lien pointe vers la même URL Wiktionnaire avec le lemme
+
+**Given** la modale est ouverte
+**When** j'utilise le clavier
+**Then** le focus est piégé dans la modale (focus trap)
+**And** Escape ferme la modale (NFR9)
+**And** au fermeture, le focus revient sur le `WordChip` qui a déclenché l'ouverture
+
+**Given** le test Wikimedia CSP
+**When** je charge l'iframe `https://fr.wiktionary.org/wiki/chocolat`
+**Then** la page se charge correctement (Wikimedia ne bloque pas l'iframing)
