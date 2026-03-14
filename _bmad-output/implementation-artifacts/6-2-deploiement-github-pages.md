@@ -28,15 +28,15 @@ Afin que le jeu soit accessible publiquement sans coût. (NFR5, NFR11)
 
 ## Tasks / Subtasks
 
-- [ ] Tâche 1 : Créer et configurer le dépôt GitHub (AC: #1)
-  - [ ] 1.1 Créer un nouveau dépôt GitHub public nommé `syllabix`
-  - [ ] 1.2 Ajouter le remote origin : `git remote add origin https://github.com/hugomatton/syllabix.git`
-  - [ ] 1.3 Pousser la branche `main` : `git push -u origin main`
+- [x] Tâche 1 : Créer et configurer le dépôt GitHub (AC: #1)
+  - [x] 1.1 Créer un nouveau dépôt GitHub public nommé `syllabix`
+  - [x] 1.2 Ajouter le remote origin : `git remote add origin https://github.com/hugomatton/syllabix.git`
+  - [ ] 1.3 Pousser la branche `main` : `git push -u origin main` ⚠️ NÉCESSITE AUTH (voir Dev Notes)
 
-- [ ] Tâche 2 : Configurer le déploiement via `gh-pages` (AC: #1)
-  - [ ] 2.1 Installer `gh-pages` en devDependency : `npm install --save-dev gh-pages`
-  - [ ] 2.2 Ajouter le script `"deploy": "gh-pages -d dist"` dans `package.json`
-  - [ ] 2.3 Exécuter `npm run build && npm run deploy` pour pousser `dist/` vers la branche `gh-pages`
+- [x] Tâche 2 : Configurer le déploiement via `gh-pages` (AC: #1)
+  - [x] 2.1 Installer `gh-pages` en devDependency : `npm install --save-dev gh-pages`
+  - [x] 2.2 Ajouter les scripts `"predeploy"` et `"deploy"` dans `package.json`
+  - [ ] 2.3 Exécuter `npm run deploy` pour pousser `dist/` vers la branche `gh-pages` ⚠️ APRÈS push main
 
 - [ ] Tâche 3 : Activer GitHub Pages sur le dépôt (AC: #1)
   - [ ] 3.1 Dans Settings > Pages du dépôt GitHub, sélectionner la branche `gh-pages` comme source
@@ -54,9 +54,9 @@ Afin que le jeu soit accessible publiquement sans coût. (NFR5, NFR11)
   - [ ] 5.2 Lancer l'audit sur `https://hugomatton.github.io/syllabix/`
   - [ ] 5.3 Corriger toute violation "critical" ou "serious" si trouvée
 
-- [ ] Tâche 6 : (Optionnel) Automatiser via GitHub Actions
-  - [ ] 6.1 Créer `.github/workflows/deploy.yml` pour déploiement automatique sur push main
-  - [ ] 6.2 Voir Dev Notes section "GitHub Actions" pour le template
+- [x] Tâche 6 : (Optionnel) Automatiser via GitHub Actions
+  - [x] 6.1 Créer `.github/workflows/deploy.yml` pour déploiement automatique sur push main
+  - [x] 6.2 Template appliqué depuis Dev Notes
 
 ## Dev Notes
 
@@ -201,6 +201,33 @@ claude-sonnet-4-6
 
 ### Debug Log References
 
+- Push `git push -u origin main` bloqué par HTTP 401 — GitHub exige un PAT (Personal Access Token) pour HTTPS. L'authentification SSH n'est pas configurée. Action manuelle requise (voir section auth ci-dessous).
+
 ### Completion Notes List
 
+- ✅ `gh-pages` v6.3.0 installé en devDependency
+- ✅ Scripts `predeploy` (`npm run build`) et `deploy` (`gh-pages -d dist`) ajoutés dans `package.json`
+- ✅ Build `npm run build` vérifié : génère `dist/` avec chemins `/syllabix/` corrects
+- ✅ `.github/workflows/deploy.yml` créé : déploiement automatique sur push `main` via `peaceiris/actions-gh-pages@v4`
+- ✅ 246 tests passent (aucune régression)
+- ⏳ Push `main` vers GitHub bloqué (auth 401) — action manuelle requise par Hugo
+- ⏳ Tâches 2.3, 3, 4, 5 : requièrent push puis vérifications manuelles
+
+### Auth requise pour finaliser
+
+Pour push via HTTPS, Hugo doit soit :
+**Option A — PAT (recommandé)** :
+1. Aller sur https://github.com/settings/tokens/new → créer un PAT avec scope `repo`
+2. Dans le terminal : `git push -u origin main` → saisir le username + PAT comme mot de passe
+
+**Option B — GitHub CLI** :
+```bash
+brew install gh && gh auth login
+git push -u origin main
+```
+
 ### File List
+
+- `package.json` — ajout scripts `predeploy` et `deploy`, ajout devDependency `gh-pages`
+- `package-lock.json` — mis à jour avec `gh-pages` et ses dépendances
+- `.github/workflows/deploy.yml` — workflow CI/CD GitHub Actions

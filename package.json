@@ -7,6 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist",
     "test": "vitest",
     "test:python": "python scripts/test_build_graph.py",
     "test:phonetics": "python scripts/run_tests.py"
@@ -23,6 +25,7 @@
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.4",
     "@vitest/ui": "^4.0.18",
+    "gh-pages": "^6.3.0",
     "jsdom": "^28.1.0",
     "typescript": "~5.7.2",
     "vite": "^6.2.0",
