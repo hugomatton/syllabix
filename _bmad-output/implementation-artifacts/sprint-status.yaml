@@ -81,7 +81,7 @@ development_status:
   epic-5-retrospective: optional
 
   # Epic 6 : Déploiement & Mise en Production
-  epic-6: done
-  6-1-configuration-vite-pour-github-pages: backlog
-  6-2-deploiement-github-pages: backlog
+  epic-6: in-progress
+  6-1-configuration-vite-pour-github-pages: done
+  6-2-deploiement-github-pages: in-progress
   epic-6-retrospective: optional

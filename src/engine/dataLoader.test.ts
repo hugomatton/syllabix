@@ -75,9 +75,9 @@ describe('loadGameData', () => {
     await loadGameData()
 
     expect(fetchMock).toHaveBeenCalledTimes(3)
-    expect(fetchMock).toHaveBeenCalledWith('/dictionary.json')
-    expect(fetchMock).toHaveBeenCalledWith('/graph.json')
-    expect(fetchMock).toHaveBeenCalledWith('/syllables.json')
+    expect(fetchMock).toHaveBeenCalledWith(`${import.meta.env.BASE_URL}dictionary.json`)
+    expect(fetchMock).toHaveBeenCalledWith(`${import.meta.env.BASE_URL}graph.json`)
+    expect(fetchMock).toHaveBeenCalledWith(`${import.meta.env.BASE_URL}syllables.json`)
   })
 
   it('convertit correctement le dictionnaire en Map avec toutes les entrées', async () => {

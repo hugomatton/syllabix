@@ -7,9 +7,9 @@ export type GameData = {
 export async function loadGameData(): Promise<GameData> {
   // ARC11 : Promise.all obligatoire — chargement parallèle
   const [dictResponse, graphResponse, syllablesResponse] = await Promise.all([
-    fetch('/dictionary.json'),
-    fetch('/graph.json'),
-    fetch('/syllables.json'),
+    fetch(`${import.meta.env.BASE_URL}dictionary.json`),
+    fetch(`${import.meta.env.BASE_URL}graph.json`),
+    fetch(`${import.meta.env.BASE_URL}syllables.json`),
   ])
 
   // Vérification explicite des erreurs HTTP (404, 500, etc.) — fetch() ne throw pas sur les erreurs HTTP
