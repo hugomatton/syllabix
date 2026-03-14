@@ -56,6 +56,10 @@ export function GameScreen({ state, dispatch }: GameScreenProps) {
     }
   }, [])
 
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [viewportHeight])
+
   return (
     <main className={styles.root} style={{ height: `${viewportHeight}px`, overflow: 'hidden' }}>
       <RecordBurst active={showBurst} />
