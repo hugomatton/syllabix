@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react'
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { GameOver } from './GameOver'
 import { DeadEndMessage } from './DeadEndMessage'
 import { GameDataContext } from '../App/App'
@@ -146,64 +146,29 @@ describe('WordChain recap in GameOver (T5.3)', () => {
   })
 })
 
-describe('DefinitionPanel in GameOver (T5.4)', () => {
-  it('T5.4.1 — DefinitionPanel absent au montage (aucun chip sélectionné)', () => {
-    renderGameOver({ ...baseState, chain: ['chocolat', 'lapin'] })
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+describe('Wiktionnaire link in GameOver (T5.4)', () => {
+  beforeEach(() => {
+    vi.stubGlobal('open', vi.fn())
   })
 
-  it('T5.4.2 — clic sur un chip ouvre le panel avec le bon mot', () => {
+  it('T5.4.1 — clic sur un chip ouvre Wiktionnaire dans un nouvel onglet', () => {
     renderGameOver({ ...baseState, chain: ['chocolat', 'lapin'] })
     fireEvent.click(screen.getByRole('button', { name: /chocolat — voir définition/i }))
-    expect(screen.getByRole('dialog')).toBeInTheDocument()
-    expect(screen.getByRole('dialog')).toHaveAttribute('aria-label', 'Définition de chocolat')
+    expect(window.open).toHaveBeenCalledWith(
+      'https://fr.wiktionary.org/wiki/chocolat',
+      '_blank',
+      'noopener,noreferrer',
+    )
   })
 
-  it('T5.4.3 — clic sur le même chip ferme le panel (toggle)', () => {
-    renderGameOver({ ...baseState, chain: ['chocolat', 'lapin'] })
-    const chip = screen.getByRole('button', { name: /chocolat — voir définition/i })
-    fireEvent.click(chip)
-    expect(screen.getByRole('dialog')).toBeInTheDocument()
-    fireEvent.click(chip)
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-  })
-
-  it('T5.4.4 — clic sur un chip différent remplace le panel (un seul panel à la fois)', () => {
-    renderGameOver({ ...baseState, chain: ['chocolat', 'lapin'] })
-    fireEvent.click(screen.getByRole('button', { name: /chocolat — voir définition/i }))
-    expect(screen.getByRole('dialog')).toHaveAttribute('aria-label', 'Définition de chocolat')
-    fireEvent.click(screen.getByRole('button', { name: /lapin — voir définition/i }))
-    expect(screen.queryAllByRole('dialog')).toHaveLength(1)
-    expect(screen.getByRole('dialog')).toHaveAttribute('aria-label', 'Définition de lapin')
-  })
-
-  it('T5.4.5 — clic sur le bouton "Fermer" ferme le panel', () => {
-    renderGameOver({ ...baseState, chain: ['chocolat', 'lapin'] })
-    fireEvent.click(screen.getByRole('button', { name: /chocolat — voir définition/i }))
-    expect(screen.getByRole('dialog')).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: /fermer la définition/i }))
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-  })
-
-  it('T5.4.6 — le panel affiche "Définition non disponible" en V1', () => {
-    renderGameOver({ ...baseState, chain: ['chocolat', 'lapin'] })
-    fireEvent.click(screen.getByRole('button', { name: /chocolat — voir définition/i }))
-    expect(screen.getByText('Définition non disponible')).toBeInTheDocument()
-  })
-
-  it('T5.4.7 — touche Escape ferme le panel', () => {
-    renderGameOver({ ...baseState, chain: ['chocolat', 'lapin'] })
-    fireEvent.click(screen.getByRole('button', { name: /chocolat — voir définition/i }))
-    expect(screen.getByRole('dialog')).toBeInTheDocument()
-    fireEvent.keyDown(document, { key: 'Escape' })
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-  })
-
-  it('T5.4.8 — chips ont aria-expanded="true" quand sélectionnés', () => {
-    renderGameOver({ ...baseState, chain: ['chocolat', 'lapin'] })
-    const chip = screen.getByRole('button', { name: /chocolat — voir définition/i })
-    expect(chip).toHaveAttribute('aria-expanded', 'false')
-    fireEvent.click(chip)
-    expect(chip).toHaveAttribute('aria-expanded', 'true')
+  it('T5.4.2 — clic sur un chip de suggestion ouvre Wiktionnaire', () => {
+    renderGameOver({ ...baseState, gameOverReason: 'timeout', chain: ['chocolat'] })
+    const suggBtn = screen.getAllByRole('button', { name: /voir la définition de/i })[0]
+    fireEvent.click(suggBtn)
+    expect(window.open).toHaveBeenCalledWith(
+      expect.stringContaining('fr.wiktionary.org/wiki/'),
+      '_blank',
+      'noopener,noreferrer',
+    )
   })
 })

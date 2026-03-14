@@ -1,8 +1,7 @@
-import { useState, useCallback, useMemo, type Dispatch } from 'react'
+import { useCallback, useMemo, type Dispatch } from 'react'
 import type { GameState, GameAction } from '../../game/gameTypes'
 import styles from './GameOver.module.css'
 import { DeadEndMessage } from './DeadEndMessage'
-import { DefinitionPanel } from './DefinitionPanel'
 import { WordChain } from '../GameScreen'
 import { useGameData } from '../../hooks'
 import { getSuggestions } from '../../engine'
@@ -13,14 +12,11 @@ interface GameOverProps {
 }
 
 export function GameOver({ state, dispatch }: GameOverProps) {
-  const [selectedWord, setSelectedWord] = useState<string | null>(null)
   const { graph, dictionary } = useGameData()
 
   const handleWordClick = useCallback((word: string) => {
-    setSelectedWord(prev => prev === word ? null : word)
+    window.open(`https://fr.wiktionary.org/wiki/${encodeURIComponent(word)}`, '_blank', 'noopener,noreferrer')
   }, [])
-
-  const handleClose = useCallback(() => setSelectedWord(null), [])
 
   const suggestions = useMemo(
     () => state.gameOverReason === 'timeout'
@@ -44,7 +40,7 @@ export function GameOver({ state, dispatch }: GameOverProps) {
             chain={state.chain}
             recap
             onWordClick={handleWordClick}
-            selectedWord={selectedWord}
+            selectedWord={null}
           />
         </div>
       )}
@@ -66,12 +62,6 @@ export function GameOver({ state, dispatch }: GameOverProps) {
             ))}
           </ul>
         </div>
-      )}
-      {selectedWord !== null && (
-        <DefinitionPanel
-          word={selectedWord}
-          onClose={handleClose}
-        />
       )}
       <button
         type="button"
