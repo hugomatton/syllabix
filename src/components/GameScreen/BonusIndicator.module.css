@@ -7,7 +7,7 @@
   transform: translateX(-50%);
   font-size: 1rem;
   font-weight: 700;
-  padding: 0.25em 0.75em;
+  padding: 0.3em 0.85em;
   border-radius: 999px;
   pointer-events: none;
   white-space: nowrap;
@@ -18,12 +18,14 @@
   color: var(--color-accent);
   background: var(--color-accent-bg);
   border: 1.5px solid var(--color-accent);
+  box-shadow: 0 0 12px var(--color-accent-glow);
 }
 
 .combo {
   color: var(--color-success);
   background: var(--color-success-bg);
   border: 1.5px solid var(--color-success);
+  box-shadow: 0 0 12px rgba(52, 211, 153, 0.25);
   font-size: 1.1rem;
 }
 

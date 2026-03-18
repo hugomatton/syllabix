@@ -22,7 +22,10 @@ export function StartScreen({ dispatch }: StartScreenProps) {
 
   return (
     <main className={styles.root}>
-      <h1 className={styles.title}>Syllabix</h1>
+      <div>
+        <h1 className={styles.title}>Syllabix</h1>
+        <p className={styles.subtitle}>Jeu de syllabes</p>
+      </div>
       <p className={styles.rule}>
         Trouve un mot qui commence par la dernière syllabe du mot proposé.
       </p>

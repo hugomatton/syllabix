@@ -1,6 +1,6 @@
 .container {
   display: flex;
-  gap: 16px;
+  gap: 20px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -11,10 +11,11 @@
 }
 
 .label {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--color-muted);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
+  font-weight: 600;
 }
 
 .value {

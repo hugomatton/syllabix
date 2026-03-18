@@ -1,7 +1,7 @@
 .container {
   display: flex;
   flex-direction: row;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
   justify-content: center;
 }
@@ -10,21 +10,28 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  background-color: transparent;
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  padding: 10px 16px;
+  gap: 4px;
+  background: var(--glass-bg);
+  border: 1.5px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 12px 24px;
   min-height: 44px;
+  min-width: 100px;
   cursor: pointer;
   font-family: var(--font-ui);
-  font-size: 0.9rem;
-  color: var(--color-text);
-  transition: border-color 150ms ease, background-color 150ms ease;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  transition: border-color 200ms ease, background-color 200ms ease, color 200ms ease, transform 150ms ease;
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
 }
 
 .button:hover {
-  border-color: var(--color-accent);
+  border-color: var(--color-border-accent);
+  background: var(--color-accent-bg);
+  color: var(--color-text);
+  transform: translateY(-1px);
 }
 
 .button:focus-visible {
@@ -33,13 +40,20 @@
 }
 
 .selected {
-  background-color: var(--color-accent-bg);
+  background: var(--color-accent-bg);
   border-color: var(--color-accent);
+  color: var(--color-text);
+  box-shadow: 0 0 12px var(--color-accent-glow);
 }
 
 .duration {
   font-size: 0.75rem;
   color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.selected .duration {
+  color: var(--color-accent);
 }
 
 @media (max-width: 380px) {

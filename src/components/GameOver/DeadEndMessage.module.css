@@ -1,11 +1,12 @@
 .container {
   background: var(--color-accent-bg);
   border: 1.5px solid var(--color-accent);
-  border-radius: 8px;
-  padding: 12px 16px;
+  border-radius: 14px;
+  padding: 14px 20px;
   width: 100%;
   max-width: 560px;
   box-sizing: border-box;
+  box-shadow: 0 0 16px var(--color-accent-glow);
 }
 
 .text {
@@ -16,6 +17,6 @@
 }
 
 .syllable {
-  color: #b45309; /* amber accessible : ratio ~4.8:1 sur --color-accent-bg, WCAG AA ✓ (var(--color-accent) = 3.1:1, insuffisant) */
+  color: var(--color-accent);
   font-weight: 700;
 }

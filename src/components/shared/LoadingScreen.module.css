@@ -3,11 +3,10 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background-color: #fafafa; /* TODO: Story 3.1 migrera vers var(--color-bg) */
 }
 
 .message {
-  color: #9ca3af; /* TODO: Story 3.1 migrera vers var(--color-muted) */
+  color: var(--color-muted);
   font-size: 1rem;
   font-family: var(--font-ui);
 }

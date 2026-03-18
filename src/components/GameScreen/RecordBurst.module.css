@@ -11,12 +11,18 @@
 .message {
   font-size: clamp(1.5rem, 5vw, 2.5rem);
   font-weight: 800;
-  color: var(--color-accent);
   text-align: center;
-  padding: 0.5em 1em;
-  background: var(--color-accent-bg);
+  padding: 0.6em 1.2em;
+  border-radius: 16px;
+  background: var(--gradient-accent);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
   border: 2px solid var(--color-accent);
-  border-radius: 12px;
+  box-shadow: 0 0 30px var(--color-accent-glow), var(--shadow-md);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background-color: rgba(15, 11, 26, 0.8);
 }
 
 @media (prefers-reduced-motion: no-preference) {
