@@ -1,28 +1,50 @@
 /* ============================================================
    Syllabix — Global CSS Reset & Design Tokens
-   Story 3.1 | Light Amber Palette | UX1, UX11
+   Redesign: "Nuit littéraire" — Dark immersive game theme
    ============================================================ */
 
 /* ── Design Tokens ─────────────────────────────────────────── */
 :root {
-  /* Couleurs */
-  --color-bg: #fafafa;
-  --color-surface: #f7f7f5;
-  --color-text: #111111;
-  --color-muted: #9ca3af;
-  --color-accent: #d97706; /* ⚠️ ratio ~3.1:1 sur fond clair — insuffisant seul pour du texte (WCAG AA) ; toujours doubler avec border ou fond */
-  --color-accent-bg: #fffbeb;
-  --color-border: #e0e0e0;
-  --color-success: #16a34a;
-  --color-success-bg: #f0fdf4;
-  --color-error: #dc2626;
+  /* Couleurs — Palette sombre immersive */
+  --color-bg: #0f0b1a;
+  --color-bg-soft: #160f26;
+  --color-surface: rgba(255, 255, 255, 0.06);
+  --color-surface-hover: rgba(255, 255, 255, 0.10);
+  --color-text: #f0eef5;
+  --color-text-secondary: rgba(240, 238, 245, 0.65);
+  --color-muted: rgba(255, 255, 255, 0.4);
+  --color-accent: #f59e0b;
+  --color-accent-hover: #fbbf24;
+  --color-accent-bg: rgba(245, 158, 11, 0.12);
+  --color-accent-glow: rgba(245, 158, 11, 0.25);
+  --color-border: rgba(255, 255, 255, 0.10);
+  --color-border-accent: rgba(245, 158, 11, 0.3);
+  --color-success: #34d399;
+  --color-success-bg: rgba(52, 211, 153, 0.12);
+  --color-error: #f87171;
+  --color-error-bg: rgba(248, 113, 113, 0.12);
+
+  /* Gradients */
+  --gradient-accent: linear-gradient(135deg, #f59e0b, #ef4444);
+  --gradient-bg: radial-gradient(ellipse at 50% 0%, #1e1340 0%, #0f0b1a 70%);
+  --gradient-surface: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+
+  /* Glassmorphism */
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-blur: 16px;
 
   /* Typographie */
   --font-display: 'Fraunces', Georgia, serif;
   --font-ui: 'Inter', system-ui, sans-serif;
-  --font-family: var(--font-ui); /* alias legacy */
+  --font-family: var(--font-ui);
   --font-size-base: 16px;
   --line-height-base: 1.5;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 20px var(--color-accent-glow);
 }
 
 /* ── Reset CSS ──────────────────────────────────────────────── */
@@ -45,7 +67,10 @@ body {
   font-size: var(--font-size-base);
   line-height: var(--line-height-base);
   background-color: var(--color-bg);
+  background-image: var(--gradient-bg);
+  background-attachment: fixed;
   color: var(--color-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
 }

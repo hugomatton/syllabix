@@ -2,6 +2,7 @@
   position: relative;
   width: 120px;
   height: 120px;
+  filter: drop-shadow(0 0 8px var(--color-accent-glow));
 }
 
 .svg {
@@ -32,6 +33,10 @@
   stroke: var(--color-error);
 }
 
+.container[data-warning="true"] {
+  filter: drop-shadow(0 0 10px rgba(248, 113, 113, 0.3));
+}
+
 .value {
   position: absolute;
   inset: 0;
@@ -41,4 +46,5 @@
   font-size: 1.5rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+  color: var(--color-text);
 }
