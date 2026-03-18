@@ -25,12 +25,13 @@
 
 .subtitle {
   font-family: var(--font-display);
-  font-size: clamp(1rem, 3vw, 1.25rem);
+  font-size: clamp(0.85rem, 2.5vw, 1.1rem);
   font-weight: 400;
   color: var(--color-text-secondary);
-  margin: -16px 0 0 0;
+  margin: 8px 0 0 0;
   letter-spacing: 0.15em;
   text-transform: uppercase;
+  text-align: center;
 }
 
 .rule {
