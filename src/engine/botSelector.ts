@@ -48,20 +48,17 @@ export function selectBotWord(
   const chainSet = new Set(chain.map(w => w.toLowerCase()))
   const lowerPrev = previousWord.toLowerCase()
 
-  // IPA de tous les mots déjà joués — exclure les candidats avec la même prononciation (pluriels, féminins…)
-  const chainIPAs = new Set(
-    chain.map(w => dictionary.get(w.toLowerCase())?.normalize('NFC')).filter(Boolean) as string[]
-  )
+  // Suffixes triviaux pour détecter les inflexions orthographiques du mot précédent
+  const trivialSuffixes = ['aient', 'ions', 'eaux', 'ment', 'euse', 'rice', 'ais', 'ait', 'ant', 'aux', 'ent', 'eur', 'iez', 'ons', 'er', 'es', 'ez', 'e', 's', 'x']
 
   const filtered = candidates.filter(candidate => {
     const lowerCandidate = candidate.toLowerCase()
     // Exclure les doublons de chaîne (orthographe identique)
     if (chainSet.has(lowerCandidate)) return false
-    // Exclure les terminaisons orthographiques du mot précédent
-    if (lowerPrev && lowerPrev.endsWith(lowerCandidate)) return false
-    // Exclure les homophones de mots déjà joués (même IPA NFC = même mot effectivement)
-    const candidateIPA = dictionary.get(lowerCandidate)?.normalize('NFC')
-    if (candidateIPA && chainIPAs.has(candidateIPA)) return false
+    // Exclure les inflexions triviales du mot précédent (suffixes connus, bidirectionnel)
+    if (lowerPrev && trivialSuffixes.some(s =>
+      lowerPrev === lowerCandidate + s || lowerCandidate === lowerPrev + s
+    )) return false
     // Exclure les mots blacklistés
     if (BLACKLIST.has(lowerCandidate)) return false
     return true

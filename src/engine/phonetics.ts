@@ -5,7 +5,7 @@ export type BonusType = 'none' | 'ortho' | 'combo' | 'both'
 
 export type ValidationResult = {
   valid: boolean
-  reason: 'not-in-dictionary' | 'wrong-syllable' | 'inflection' | 'blacklisted' | null
+  reason: 'not-in-dictionary' | 'wrong-syllable' | 'inflection' | 'blacklisted' | 'already-played' | null
   bonusType: BonusType
   scorePoints: number
 }
@@ -185,6 +185,7 @@ export function getLastTwoSyllables(
  * @param dictionary  Map<mot, IPA> pré-chargée
  * @param graph       Record<syllabe, mots[]> pré-chargé
  * @param syllables   Map<mot, first_syl_IPA> depuis syllables.json (optionnel, fallback si absent)
+ * @param chain       mots déjà joués dans la partie (pour exclure les doublons)
  */
 export function validateWord(
   input: string,
@@ -192,12 +193,18 @@ export function validateWord(
   dictionary: Map<string, string>,
   graph: Record<string, string[]>,
   syllables: Map<string, string> = new Map(),
+  chain: string[] = [],
 ): ValidationResult {
   const normalizedInput = input.toLowerCase().trim()
 
   // Étape 0 : rejeter les mots blacklistés (onomatopées, formes parasites…)
   if (BLACKLIST.has(normalizedInput)) {
     return { valid: false, reason: 'blacklisted', bonusType: 'none', scorePoints: 1 }
+  }
+
+  // Étape 0bis : rejeter les mots déjà joués dans la chaîne
+  if (chain.length > 0 && chain.some(w => w.toLowerCase() === normalizedInput)) {
+    return { valid: false, reason: 'already-played', bonusType: 'none', scorePoints: 1 }
   }
 
   // Étape 1 : le mot doit être dans le dictionnaire (FR10)
@@ -211,7 +218,7 @@ export function validateWord(
   // le break déclenche quand même le skip vers l'étape 2 qui retournera wrong-syllable.
   const currentWordLower = currentWord.toLowerCase()
   const currentIPA = dictionary.get(currentWordLower)
-  const suffixes = ['aux', 'es', 's', 'e']  // ordre : plus long d'abord
+  const suffixes = ['aient', 'ions', 'eaux', 'ment', 'euse', 'rice', 'ais', 'ait', 'ant', 'aux', 'ent', 'eur', 'iez', 'ons', 'er', 'es', 'ez', 'e', 's', 'x']  // ordre : plus long d'abord
   if (currentIPA) {
     const normalizedCurrentIPA = currentIPA.normalize('NFC')
     const normalizedInputIPA = inputIPA.normalize('NFC')
@@ -229,6 +236,23 @@ export function validateWord(
           return { valid: false, reason: 'inflection', bonusType: 'none', scorePoints: 1 }
         }
         break
+      }
+    }
+
+    // Heuristique stem commun : si les deux mots partagent un long préfixe orthographique
+    // ET l'IPA du plus court est un préfixe de l'IPA du plus long → inflexion (conjugaisons, dérivations)
+    const minWordLen = Math.min(normalizedInput.length, currentWordLower.length)
+    let commonPrefixLen = 0
+    for (let i = 0; i < minWordLen; i++) {
+      if (normalizedInput[i] === currentWordLower[i]) commonPrefixLen++
+      else break
+    }
+    const stemThreshold = Math.max(5, Math.ceil(minWordLen * 0.7))
+    if (commonPrefixLen >= stemThreshold) {
+      const shorterIPA = normalizedInput.length <= currentWordLower.length ? normalizedInputIPA : normalizedCurrentIPA
+      const longerIPA = normalizedInput.length <= currentWordLower.length ? normalizedCurrentIPA : normalizedInputIPA
+      if (longerIPA.startsWith(shorterIPA)) {
+        return { valid: false, reason: 'inflection', bonusType: 'none', scorePoints: 1 }
       }
     }
   }
@@ -250,9 +274,14 @@ export function validateWord(
     inputStart = inputIPAChars.slice(0, targetChars.length).join('')
   }
 
-  // Étape 4 : distance de Levenshtein ≤ PHONETIC_TOLERANCE (FR8)
+  // Étape 4 : distance de Levenshtein ≤ tolérance effective (FR8)
+  // Tolérance proportionnelle : dist ≤ min(PHONETIC_TOLERANCE, min(len_a, len_b))
+  // Empêche une syllabe très courte (ex. "ɛ") de matcher une syllabe longue (ex. "pɛ̃") par pure délétion
   const dist = levenshteinIPA(inputStart, targetSyl)
-  if (dist > PHONETIC_TOLERANCE) return { valid: false, reason: 'wrong-syllable', bonusType: 'none', scorePoints: 1 }
+  const inputStartLen = normalizeIPAChars(inputStart).length
+  const targetSylLen = normalizeIPAChars(targetSyl).length
+  const effectiveTolerance = Math.min(PHONETIC_TOLERANCE, Math.min(inputStartLen, targetSylLen))
+  if (dist > effectiveTolerance) return { valid: false, reason: 'wrong-syllable', bonusType: 'none', scorePoints: 1 }
 
   // ✅ Mot valide — calculer les bonus (FR16, FR17)
   const isOrthoBonus = dist === 0 // match phonétique exact → bonus orthographe (FR16)
