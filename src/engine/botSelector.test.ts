@@ -86,16 +86,11 @@ describe('selectBotWord — filtres chain et previousWord', () => {
   })
 
   it('autorise les homophones de mots déjà dans la chaîne (cas 8)', () => {
-    // lattes et latte ont le même IPA — homophones autorisés
-    const mockDict = new Map<string, string>([
-      ['latte', 'lat'],
-      ['lattes', 'lat'],
-      ['lampe', 'lɑ̃p'],
-    ])
+    // lattes et latte ont le même IPA — homophones autorisés (filtre homophone supprimé)
     const mockGraph: Record<string, string[]> = { la: ['latte', 'lattes', 'lampe'] }
     // chain contient 'latte' → lattes est un homophone mais DOIT rester disponible
     const results = new Set(Array.from({ length: 30 }, () =>
-      selectBotWord('la', mockGraph, ['latte'], '', mockDict)
+      selectBotWord('la', mockGraph, ['latte'], '')
     ))
     expect(results.has('latte')).toBe(false)  // exact match in chain — still excluded
     expect(results.has('lattes')).toBe(true)   // homophone — now allowed

@@ -84,7 +84,7 @@ export function WordInput({ state, dispatch }: WordInputProps) {
         // Le mot du joueur n'a aucune lastSyl dans le graph → dead-end immédiat
         dispatch({ type: 'GAME_OVER', reason: 'dead-end', deadSyllable: undefined })
       } else {
-        const botWord = selectBotWord(lastSyl, graph, [...state.chain, trimmed], trimmed, dictionary)
+        const botWord = selectBotWord(lastSyl, graph, [...state.chain, trimmed], trimmed)
         if (!botWord) {
           dispatch({ type: 'GAME_OVER', reason: 'dead-end', deadSyllable: lastSyl })
         } else {
