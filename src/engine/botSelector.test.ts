@@ -60,45 +60,45 @@ describe('selectBotWord — filtres chain et previousWord', () => {
     expect(result).toBe(lastOne)
   })
 
-  it('ne retourne pas un mot qui est une terminaison du mot précédent', () => {
-    const candidates = graph['la'] ?? []
-    expect(candidates.length).toBeGreaterThan(1)
-    const target = candidates[0]
-    const previousWord = 'prefixe' + target // previousWord.endsWith(target) = true
-    const nonTargetCandidates = candidates.filter(c => !previousWord.toLowerCase().endsWith(c.toLowerCase()))
-    // Seulement pertinent si d'autres candidats existent
-    if (nonTargetCandidates.length === 0) return
+  it('ne retourne pas une inflexion triviale du mot précédent (suffix connu)', () => {
+    // "tables" → bot ne doit pas jouer "table" (tables = table + s)
+    const mockGraph: Record<string, string[]> = { la: ['table', 'lampe', 'latte'] }
     const results = new Set(Array.from({ length: 30 }, () =>
-      selectBotWord('la', graph, [], previousWord)
+      selectBotWord('la', mockGraph, [], 'tables')
     ))
-    // target ne doit jamais apparaître dans les résultats
-    expect(results.has(target)).toBe(false)
+    expect(results.has('table')).toBe(false)
+    expect(results.has('lampe')).toBe(true)
+  })
+  it('retourne un mot légitime même s\'il est terminaison orthographique du mot précédent', () => {
+    // "acceptable" se termine par "table" mais "table" est un mot légitime, pas une inflexion
+    const mockGraph: Record<string, string[]> = { la: ['table', 'lampe'] }
+    const results = new Set(Array.from({ length: 30 }, () =>
+      selectBotWord('la', mockGraph, [], 'acceptable')
+    ))
+    // "table" DOIT être possible car "acceptable" ≠ "table" + suffixe connu
+    expect(results.has('table')).toBe(true)
   })
 
   it('retourne null si tous les candidats sont dans la chaîne (dead-end)', () => {
-    // Utiliser une syllabe avec peu de candidats pour limiter la taille de la chaîne
-    const syl = 'pɛ̃'
-    const candidates = graph[syl] ?? []
-    expect(candidates.length).toBeGreaterThan(0)
-    const result = selectBotWord(syl, graph, candidates, '')
+    const mockGraph: Record<string, string[]> = { la: ['latte', 'lampe'] }
+    const result = selectBotWord('la', mockGraph, ['latte', 'lampe'], '')
     expect(result).toBeNull()
   })
 
-  it('ne retourne pas un homophone d\'un mot déjà dans la chaîne (pluriel/féminin)', () => {
-    // lattes et latte ont le même IPA — si latte est dans la chaîne, lattes doit être exclu
+  it('autorise les homophones de mots déjà dans la chaîne (cas 8)', () => {
+    // lattes et latte ont le même IPA — homophones autorisés
     const mockDict = new Map<string, string>([
       ['latte', 'lat'],
       ['lattes', 'lat'],
       ['lampe', 'lɑ̃p'],
     ])
     const mockGraph: Record<string, string[]> = { la: ['latte', 'lattes', 'lampe'] }
-    // chain contient 'latte' → lattes doit être filtré (même IPA)
+    // chain contient 'latte' → lattes est un homophone mais DOIT rester disponible
     const results = new Set(Array.from({ length: 30 }, () =>
       selectBotWord('la', mockGraph, ['latte'], '', mockDict)
     ))
-    expect(results.has('lattes')).toBe(false)
-    expect(results.has('latte')).toBe(false)  // déjà dans chain
-    // lampe doit rester disponible
+    expect(results.has('latte')).toBe(false)  // exact match in chain — still excluded
+    expect(results.has('lattes')).toBe(true)   // homophone — now allowed
     expect(results.has('lampe')).toBe(true)
   })
 })

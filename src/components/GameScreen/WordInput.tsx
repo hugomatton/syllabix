@@ -62,7 +62,7 @@ export function WordInput({ state, dispatch }: WordInputProps) {
     if (!trimmed) return
     isSubmittingRef.current = true
 
-    const result = validateWord(trimmed, state.currentWord, dictionary, graph, syllables)
+    const result = validateWord(trimmed, state.currentWord, dictionary, graph, syllables, state.chain)
 
     if (result.valid) {
       // Happy path
@@ -103,6 +103,8 @@ export function WordInput({ state, dispatch }: WordInputProps) {
         ? 'Mot non autorisé'
         : result.reason === 'inflection'
         ? 'Forme fléchie du mot courant non autorisée'
+        : result.reason === 'already-played'
+        ? 'Mot déjà joué dans cette partie'
         : `Ne commence pas par ${targetSyl ?? '?'}`
 
       dispatch({ type: 'SUBMIT_WORD', word: trimmed, isValid: false, error: errorMsg })

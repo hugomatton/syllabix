@@ -152,32 +152,32 @@
   {
     "word": "ai",
     "previous": "lapin",
-    "expected": true,
-    "note": "last_syl(lapin)='pɛ̃', first_syl(ai)='ɛ', dist=2"
+    "expected": false,
+    "note": "last_syl(lapin)='pɛ̃', first_syl(ai)='ɛ', dist=2 — rejeté par tolérance proportionnelle (minLen=1)"
   },
   {
     "word": "aicher",
     "previous": "lapin",
-    "expected": true,
-    "note": "last_syl(lapin)='pɛ̃', first_syl(aicher)='ɛ', dist=2"
+    "expected": false,
+    "note": "last_syl(lapin)='pɛ̃', first_syl(aicher)='ɛ', dist=2 — rejeté par tolérance proportionnelle (minLen=1)"
   },
   {
     "word": "aida",
     "previous": "lapin",
-    "expected": true,
-    "note": "last_syl(lapin)='pɛ̃', first_syl(aida)='ɛ', dist=2"
+    "expected": false,
+    "note": "last_syl(lapin)='pɛ̃', first_syl(aida)='ɛ', dist=2 — rejeté par tolérance proportionnelle (minLen=1)"
   },
   {
     "word": "aidai",
     "previous": "lapin",
-    "expected": true,
-    "note": "last_syl(lapin)='pɛ̃', first_syl(aidai)='ɛ', dist=2"
+    "expected": false,
+    "note": "last_syl(lapin)='pɛ̃', first_syl(aidai)='ɛ', dist=2 — rejeté par tolérance proportionnelle (minLen=1)"
   },
   {
     "word": "aidaient",
     "previous": "lapin",
-    "expected": true,
-    "note": "last_syl(lapin)='pɛ̃', first_syl(aidaient)='ɛ', dist=2"
+    "expected": false,
+    "note": "last_syl(lapin)='pɛ̃', first_syl(aidaient)='ɛ', dist=2 — rejeté par tolérance proportionnelle (minLen=1)"
   },
   {
     "word": "ver",

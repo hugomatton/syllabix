@@ -248,4 +248,16 @@ describe('WordInput', () => {
 
     expect(mockDispatch).not.toHaveBeenCalled()
   })
+
+  it('mot déjà joué → message "Mot déjà joué dans cette partie"', () => {
+    vi.mocked(validateWord).mockReturnValue({ valid: false, reason: 'already-played', bonusType: 'none', scorePoints: 1 })
+    vi.mocked(getLastSyllable).mockReturnValue('la')
+
+    renderWordInput({ chain: ['chocolat', 'lapin'] })
+    const input = screen.getByRole('textbox')
+    typeInInput(input, 'lapin')
+    fireEvent.keyDown(input, { key: 'Enter' })
+
+    expect(screen.getByText(/Mot déjà joué dans cette partie/i)).toBeInTheDocument()
+  })
 })

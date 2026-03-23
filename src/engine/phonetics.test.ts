@@ -95,24 +95,31 @@ describe('validateWord — cas unitaires', () => {
     expect(result.valid).toBe(true)
     expect(result.reason).toBeNull()
   })
-  it('AC5 — retourne valid=true dans la zone de tolérance phonétique (dist IPA ≤ 2)', () => {
-    // 'aicher' (IPA: ɛʃe, first_syl: ɛ) suit 'lapin' (last_syl: pɛ̃)
-    // levenshteinIPA('ɛ', 'pɛ̃') = 2 → dans la tolérance (PHONETIC_TOLERANCE = 2)
+  it('AC5 — rejette quand dist=2 mais firstSyl trop court (tolérance proportionnelle)', () => {
+    // 'aicher' (IPA: ɛʃe, first_syl: ɛ, len=1) suit 'lapin' (last_syl: pɛ̃, len=3)
+    // levenshteinIPA('ɛ', 'pɛ̃') = 2 → effectiveTolerance = min(2, min(1,3)) = 1 → rejeté
     const result = validateWord('aicher', 'lapin', dictionary, graph)
+    expect(result.valid).toBe(false)
+    expect(result.reason).toBe('wrong-syllable')
+  })
+  it('AC5b — accepte dans la zone de tolérance quand syllabes de longueur comparable', () => {
+    // 'lac' (first_syl: lak, len=3) suit 'chocolat' (last_syl: la, len=2)
+    // levenshteinIPA('lak', 'la') = 1 → effectiveTolerance = min(2, min(3,2)) = 2 → accepté
+    const result = validateWord('lac', 'chocolat', dictionary, graph)
     expect(result.valid).toBe(true)
     expect(result.reason).toBeNull()
   })
   it('fallback (getFirstSyllable=null) — préfixe fixe utilisé, résultat déterministe', () => {
     // IPA 'qzz' n'a aucun préfixe dans mockGraph → getFirstSyllable retourne null → fallback activé
-    // Fallback : inputStart = 'qz' (targetChars.length=2 pour 'la'), dist('qz','la')=2 ≤ 2 → valid=true
+    // Fallback : inputStart = 'qz' (targetChars.length=2 pour 'la'), dist('qz','la')=2 > 1 → invalid
     const mockDict = new Map<string, string>([
       ['motfallback', 'qzz'],
       ['current', 'xla'],
     ])
     const mockGraph: Record<string, string[]> = { la: ['current'] }
     const result = validateWord('motfallback', 'current', mockDict, mockGraph)
-    expect(result.valid).toBe(true) // dist exactement = PHONETIC_TOLERANCE = 2
-    expect(result.reason).toBeNull()
+    expect(result.valid).toBe(false) // dist(2) > PHONETIC_TOLERANCE(1)
+    expect(result.reason).toBe('wrong-syllable')
   })
   it('currentWord absent du dict → valid=false avec reason wrong-syllable (état jeu invalide)', () => {
     // Si le bot fournit un mot hors dictionnaire, la raison est wrong-syllable
@@ -205,8 +212,9 @@ describe('validateWord — bonus orthographe (AC1, FR16)', () => {
 
 describe('validateWord — combo syllabe double (AC2, FR17)', () => {
   it("bonusType='combo' et scorePoints=3 quand préfixe IPA = 2 dernières syllabes", () => {
-    // Mock : current IPA = "ʃokola" → lastTwoSyl = "kola"
-    //        input IPA = "kolaʒɛn" → commence par "kola" → combo !
+    // Mock : current IPA = "ʃokola" → lastSyl = "la", lastTwoSyl = "kola"
+    //        motcombo IPA = "kolaʒɛn" → syllables force firstSyl = "lo" → dist("lo","la")=1 → valid
+    //        "kolaʒɛn".startsWith("kola") → combo, mais dist>0 → pas ortho → bonusType='combo'
     const mockDict = new Map<string, string>([
       ['current', 'ʃokola'],
       ['motcombo', 'kolaʒɛn'],
@@ -215,7 +223,8 @@ describe('validateWord — combo syllabe double (AC2, FR17)', () => {
       la: ['motcombo'],
       ko: ['motcombo'],
     }
-    const result = validateWord('motcombo', 'current', mockDict, mockGraph)
+    const mockSyllables = new Map<string, string>([['motcombo', 'lo']])
+    const result = validateWord('motcombo', 'current', mockDict, mockGraph, mockSyllables)
     expect(result.valid).toBe(true)
     expect(result.bonusType).toBe('combo')
     expect(result.scorePoints).toBe(3)
@@ -281,5 +290,52 @@ describe('validateWord — cumul bonus ortho + combo (AC3)', () => {
     expect(result.valid).toBe(true)
     expect(result.bonusType).toBe('both')
     expect(result.scorePoints).toBe(4)
+  })
+})
+
+describe('validateWord — doublons chaîne joueur (case 4)', () => {
+  it('rejette un mot déjà présent dans la chaîne', () => {
+    const result = validateWord('lapin', 'chocolat', dictionary, graph, new Map(), ['chocolat', 'lapin'])
+    expect(result.valid).toBe(false)
+    expect(result.reason).toBe('already-played')
+  })
+  it('accepte un mot absent de la chaîne', () => {
+    const result = validateWord('lapin', 'chocolat', dictionary, graph, new Map(), ['chocolat'])
+    expect(result.valid).toBe(true)
+  })
+  it('vérifie la chaîne en case-insensitive', () => {
+    const result = validateWord('Lapin', 'chocolat', dictionary, graph, new Map(), ['chocolat', 'LAPIN'])
+    expect(result.valid).toBe(false)
+    expect(result.reason).toBe('already-played')
+  })
+  it('fonctionne sans chaîne (rétrocompatibilité)', () => {
+    const result = validateWord('lapin', 'chocolat', dictionary, graph)
+    expect(result.valid).toBe(true)
+  })
+})
+
+describe('validateWord — inflexions stem commun (case 2)', () => {
+  it('rejette conjugaison partageant stem long et IPA préfixe', () => {
+    // chante IPA=ʃɑ̃t, chanter IPA=ʃɑ̃te — "chante" (5 chars) est préfixe de "chanter" (7 chars)
+    // stem commun "chant" = 5 chars, minLen=6, threshold=max(5, ceil(6*0.7))=max(5,5)=5 → 5≥5 ✓
+    // IPA "ʃɑ̃t" est préfixe de "ʃɑ̃te" → inflexion
+    const mockDict = new Map<string, string>([
+      ['chante', 'ʃɑ̃t'],
+      ['chanter', 'ʃɑ̃te'],
+    ])
+    const mockGraph: Record<string, string[]> = { 'ʃɑ̃t': ['chante'], 'ʃɑ̃': ['chanter'] }
+    const result = validateWord('chanter', 'chante', mockDict, mockGraph)
+    expect(result.valid).toBe(false)
+    expect(result.reason).toBe('inflection')
+  })
+  it('ne rejette pas des mots avec stem court (< 5 chars)', () => {
+    // port/porte — stem "port" = 4 chars < threshold(5) → pas d'inflexion
+    const mockDict = new Map<string, string>([
+      ['port', 'pɔʁ'],
+      ['porte', 'pɔʁt'],
+    ])
+    const mockGraph: Record<string, string[]> = { 'pɔʁ': ['port'], 'pɔʁt': ['porte'] }
+    const result = validateWord('porte', 'port', mockDict, mockGraph)
+    expect(result.reason).not.toBe('inflection')
   })
 })
