@@ -32,7 +32,6 @@ export const STARTER_WORDS = [
  * @param graph        - Record<syllabe, mots[]> pré-chargé depuis graph.json
  * @param chain        - mots déjà joués dans la partie (bot + joueur), pour exclure les doublons
  * @param previousWord - mot soumis par le joueur, pour exclure les terminaisons orthographiques
- * @param dictionary   - Map<mot, IPA> pour exclure les homophones de mots déjà joués (pluriels, féminins…)
  * @returns mot bot aléatoire, ou null si lastSyllable inconnue ou tous les candidats filtrés
  */
 export function selectBotWord(
@@ -40,7 +39,6 @@ export function selectBotWord(
   graph: Record<string, string[]>,
   chain: string[] = [],
   previousWord: string = '',
-  dictionary: Map<string, string> = new Map(),
 ): string | null {
   const candidates = graph[lastSyllable]
   if (!candidates || candidates.length === 0) return null
